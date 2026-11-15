@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#17795c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="صيدلية البيت">
+<title>صيدلية البيت</title>
+<style>
+:root{--bg:#f6f7f5;--card:#fff;--tx:#1d2b25;--mut:#68766f;--pri:#17795c;--pri-t:#fff;--bd:#e1e6e2;--red:#c0392b;--org:#c77a0a;--grn:#17795c;--redb:#fbe9e6;--orgb:#fdf1de;--grnb:#e4f3ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121816;--card:#1b2420;--tx:#e8efeb;--mut:#92a29a;--pri:#3fb48f;--pri-t:#08150f;--bd:#2a3731;--red:#ff8576;--org:#f0b45a;--grn:#5fcfa9;--redb:#3a1f1b;--orgb:#3a2c14;--grnb:#16322a}}
+:root[data-theme="dark"]{--bg:#121816;--card:#1b2420;--tx:#e8efeb;--mut:#92a29a;--pri:#3fb48f;--pri-t:#08150f;--bd:#2a3731;--red:#ff8576;--org:#f0b45a;--grn:#5fcfa9;--redb:#3a1f1b;--orgb:#3a2c14;--grnb:#16322a}
+html{height:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;font-size:16px;padding:0 14px 120px}
+h1{font-size:20px;margin:16px 0 4px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:12px}
+.stats{display:flex;gap:8px;margin-bottom:12px}
+.st{flex:1;border-radius:12px;padding:8px;text-align:center;font-size:12px}
+.st b{display:block;font-size:20px}
+.s-r{background:var(--redb);color:var(--red)}.s-o{background:var(--orgb);color:var(--org)}.s-g{background:var(--grnb);color:var(--grn)}
+input,select{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px;width:100%;box-sizing:border-box}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin:8px 0;display:flex;gap:10px;align-items:center}
+.card .m{flex:1;min-width:0}
+.nm{font-weight:700}
+.dt{font-size:12px;color:var(--mut);margin-top:2px}
+.badge{font-size:12px;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.b-r{background:var(--redb);color:var(--red)}.b-o{background:var(--orgb);color:var(--org)}.b-g{background:var(--grnb);color:var(--grn)}
+button{font:inherit;border:0;border-radius:12px;padding:10px 14px;background:var(--card);color:var(--tx);border:1px solid var(--bd);cursor:pointer}
+button.p{background:var(--pri);color:var(--pri-t);border-color:var(--pri);font-weight:700}
+button.d{color:var(--red)}
+.q{display:flex;align-items:center;gap:6px}
+.q button{padding:4px 10px}
+.bar{position:fixed;inset:auto 0 0 0;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--bd);display:flex;gap:8px}
+.bar button{flex:1;padding:14px}
+.seg{display:flex;gap:6px;margin-bottom:10px}
+.seg button{flex:1}.seg button.on{background:var(--pri);color:var(--pri-t);border-color:var(--pri)}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;z-index:20}
+.sheet.show{display:flex}
+.pane{background:var(--bg);width:100%;max-height:88%;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));box-sizing:border-box}
+label{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
+.row{display:flex;gap:8px}.row>div{flex:1}
+.th{height:60px;width:auto;min-width:48px;max-width:110px;border-radius:10px;object-fit:cover;background:var(--bd);flex:none;cursor:pointer}.ph{display:flex;align-items:center;justify-content:center;font-size:22px;width:60px}.al{border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px;line-height:1.7}.hd{display:flex;align-items:center;gap:12px;margin:14px 0 8px}.hd h1{margin:0}.avw{cursor:pointer;flex:none}.av{width:80px;height:94px;border-radius:18px;object-fit:cover;object-position:top;border:2px solid var(--pri);display:flex;align-items:center;justify-content:center;font-size:26px;background:var(--grnb)}.empty{text-align:center;color:var(--mut);padding:40px 10px}
+.msg{font-size:13px;margin:8px 0;color:var(--mut)}
+.msg.err{color:var(--red)}
+.note{font-size:12px;color:var(--mut);margin-top:16px;text-align:center}
+</style>
+</head>
+<body>
+<div class="hd"><div id="avw" class="avw"></div><div><h1>💊 صيدلية البيت</h1><div class="sub" style="margin:2px 0 0">قائمة الأدوية المتوفرة مع تواريخ انتهاء الصلاحية</div></div></div>
+<div class="stats">
+  <div class="st s-r"><b id="cR">0</b>منتهية</div>
+  <div class="st s-o"><b id="cO">0</b>تنتهي خلال 90 يوماً</div>
+  <div class="st s-g"><b id="cG">0</b>صالحة</div>
+</div>
+<div id="al"></div><input id="srch" placeholder="بحث باسم الدواء أو المادة الفعالة…">
+<div id="list"></div>
+<div class="note">البيانات محفوظة في هذا المتصفح فقط. استعمل «نسخ احتياطي» للحفظ.</div>
+<div class="note"><a href="privacy.html" style="color:inherit">سياسة الخصوصية</a></div>
+<div class="note" id="sy"></div>
+<div class="note"><button id="gt">اختبار الاتصال</button> <button id="gs">⚙︎ مفتاح Gemini</button> <button id="sh">🔗 مشاركة</button> <button id="rx">📋 وصفة طبية</button> <button id="cls">🧠 تصنيف الأدوية</button> <button id="pdf">📄 تصدير PDF</button> <button id="ics">📅 تذكيرات التقويم</button> <button id="bk">نسخ احتياطي</button> <button id="rs">استعادة</button></div>
+
+<div class="bar">
+  <button class="p" id="bAdd">📷 مسح وإضافة</button>
+  <button id="bRem">📷 مسح وإزالة</button>
+  <button id="bMan">＋ يدوي</button>
+</div>
+<input type="file" id="file" accept="image/*" capture="environment" hidden>
+<input type="file" id="restore" accept="application/json" hidden>
+<input type="file" id="imgf" accept="image/*" hidden>
+<input type="file" id="rxf" accept="image/*" multiple hidden>
+
+<div class="sheet" id="sheet"><div class="pane" id="pane"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+var KEY="meds-v1",curImg="",imgCb=null,AV="",DEF="",snap={},sync=null,pT=null,pushing=false,srcImg="",cropAR=4/3,formRem=false,editing=null,items=[],mode="add",pending=null;
+function load(){try{items=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){items=[]}}
+function hs(s){return s.length+":"+s.charCodeAt(10)+"."+s.charCodeAt(s.length>>1)+"."+s.charCodeAt(s.length-5)}
+function meta(it){return JSON.stringify([it.name||"",it.dci||"",it.dosage||"",it.form||"",it.lot||"",it.expiry||"",it.qty||0,it.iv||""])}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(items));localStorage.setItem("meds-snap",JSON.stringify(snap))}catch(e){}}
+function setSt(t){var e=$("sy");if(e)e.textContent=t}
+function tm(){return new Date().toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}
+function save(){
+  items.forEach(function(it){it.iv=it.img?hs(it.img):(it.iv||"");if(sync&&snap[it.id]!==meta(it))it.ts=Date.now()});
+  store();if(sync)schedulePush()}
+function prep(){items.forEach(function(it){if(!it.ts)it.ts=Date.now()})}
+function merge(remote){
+  var chg=false,need=[];
+  Object.keys(remote).forEach(function(id){
+    var r=remote[id],l=items.filter(function(i){return i.id===id})[0];
+    if(!l||(r.ts||0)>(l.ts||0)){
+      var n=Object.assign({},r);n.id=id;
+      if(l&&!r.img&&l.img&&l.iv===r.iv)n.img=l.img;
+      if(l)items[items.indexOf(l)]=n;else items.push(n);
+      snap[id]=meta(n);chg=true;
+      if(!n.img&&n.iv)need.push(id)}});
+  items=items.filter(function(i){if(!remote[i.id]&&snap[i.id]!==undefined){delete snap[i.id];chg=true;return false}return true});
+  if(chg){store();render()}
+  return need}
+function schedulePush(){clearTimeout(pT);pT=setTimeout(push,700)}
+async function push(){
+  pT=null;if(!sync)return;pushing=true;
+  try{
+    var ups=items.filter(function(it){return snap[it.id]!==meta(it)}),dels=Object.keys(snap).filter(function(id){return!items.some(function(i){return i.id===id})});
+    for(var i=0;i<ups.length;i++){var it=ups[i],pv=snap[it.id]?JSON.parse(snap[it.id])[7]:null;await sync.put(it,pv!==(it.iv||"")&&(it.img||pv));snap[it.id]=meta(it)}
+    for(var j=0;j<dels.length;j++){await sync.del(dels[j]);delete snap[dels[j]]}
+    store();setSt("🔄 متزامن · "+tm())
+  }catch(e){setSt("⚠️ تعذّرت المزامنة: "+(e&&e.message||""))}
+  pushing=false;
+  if(sync.lastRemote){var lr=sync.lastRemote;sync.lastRemote=null;merge(lr)}}
+function fbReq(p,m,b){return fetch(sync.base+p+".json",{method:m||"GET",body:b===undefined?undefined:JSON.stringify(b)}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})}
+function startFb(cfg){
+  sync={base:cfg.u+"/h/"+cfg.c,
+    put:async function(it,imgCh){var o=Object.assign({},it);delete o.img;await fbReq("/items/"+it.id,"PUT",o);if(imgCh){if(it.img)await fbReq("/img/"+it.id,"PUT",it.img);else await fbReq("/img/"+it.id,"DELETE")}},
+    del:async function(id){await fbReq("/items/"+id,"DELETE");await fbReq("/img/"+id,"DELETE")}};
+  prep();schedulePush();pull();
+  setInterval(function(){if(!document.hidden)pull()},20000);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)pull()})}
+async function pull(){
+  if(!sync||pT||pushing)return;
+  try{
+    var r=await fbReq("/items","GET")||{};Object.keys(r).forEach(function(k){r[k].id=k});
+    var need=merge(r);
+    for(var i=0;i<need.length;i++){var s=await fbReq("/img/"+need[i],"GET"),it=items.filter(function(x){return x.id===need[i]})[0];if(it&&s)it.img=s}
+    if(need.length){store();render()}
+    setSt("🔄 متزامن · "+tm())
+  }catch(e){setSt("⚠️ تعذّرت المزامنة: "+(e&&e.message||""))}}
+function applyLink(t){try{var m=t.match(/#s=([^\s]+)/),c=JSON.parse(atob(decodeURIComponent(m?m[1]:t.trim())));if(c.u&&c.c){localStorage.setItem("meds-cfg",JSON.stringify(c));return c}}catch(e){}return null}
+function openShare(){
+  var cfg=null;try{cfg=JSON.parse(localStorage.getItem("meds-cfg")||"null")}catch(e){}
+  if(!cfg){
+    open('<h2 style="margin:0 0 6px">مشاركة القائمة</h2><div class="msg">الصق رابط قاعدة بيانات Firebase (Realtime Database) ثم فعّل المزامنة.</div><input id="fu" dir="ltr" placeholder="https://اسم-المشروع-default-rtdb.firebaseio.com"><div class="row" style="margin-top:12px"><button class="p" id="fe">تفعيل المزامنة</button><button id="cx">إغلاق</button></div><div class="msg" id="fm"></div><label>لديك رابط مشاركة من شخص آخر؟ الصقه هنا</label><input id="fl" dir="ltr" placeholder="https://…#s=…"><div class="row" style="margin-top:12px"><button id="fk">ربط</button></div>');
+    $("cx").onclick=close;
+    $("fe").onclick=function(){var u=$("fu").value.trim().replace(/\/+$/,"");if(!/^https:\/\/[^\s]+$/.test(u)){$("fm").textContent="الرابط غير صحيح";return}var c={u:u,c:Array.from(crypto.getRandomValues(new Uint8Array(16))).map(function(b){return("0"+b.toString(16)).slice(-2)}).join("")};localStorage.setItem("meds-cfg",JSON.stringify(c));startFb(c);openShare()};
+    $("fk").onclick=function(){var c=applyLink($("fl").value);if(!c){$("fm").textContent="الرابط غير صالح";return}startFb(c);close()};
+    return}
+  var link=location.origin+location.pathname+"#s="+encodeURIComponent(btoa(JSON.stringify(cfg)));
+  open('<h2 style="margin:0 0 6px">المشاركة مفعّلة ✅</h2><div class="msg">أرسل هذا الرابط لزوجتك. من يملك الرابط يستطيع رؤية القائمة وتعديلها.</div><input id="lk" value="'+esc(link)+'" readonly dir="ltr"><div class="row" style="margin-top:12px"><button class="p" id="cp">نسخ / إرسال</button><button id="cx">إغلاق</button></div><div class="row" style="margin-top:8px"><button class="d" id="off">إيقاف المزامنة على هذا الجهاز</button></div>');
+  $("cx").onclick=close;
+  $("cp").onclick=function(){if(navigator.share)navigator.share({url:link,title:"صيدلية البيت"}).catch(function(){});else{$("lk").select();document.execCommand("copy")}};
+  $("off").onclick=function(){if(confirm("إيقاف المزامنة؟ تبقى القائمة محفوظة على هذا الجهاز.")){localStorage.removeItem("meds-cfg");location.reload()}}}
+$("sh").onclick=openShare;
+function initSync(){
+  if(location.hash.indexOf("#s=")===0)applyLink(location.hash);
+  try{var cfg=JSON.parse(localStorage.getItem("meds-cfg")||"null");if(cfg&&cfg.u)startFb(cfg)}catch(e){}}
+
+function $(i){return document.getElementById(i)}
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":s;return d.innerHTML}
+function norm(s){return String(s||"").toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g,"")}
+function endOf(ym){var p=String(ym||"").split("-");if(p.length<2)return null;return new Date(+p[0],+p[1],0,23,59,59)}
+function days(ym){var e=endOf(ym);return e?Math.floor((e-new Date())/864e5):null}
+function fmt(ym){var p=String(ym||"").split("-");return p.length<2?"—":p[1]+"/"+p[0]}
+function status(ym){var d=days(ym);if(d==null)return["b-o","غير معروف"];if(d<0)return["b-r","منتهي منذ "+Math.abs(d)+" يوم"];if(d<=90)return["b-o","ينتهي بعد "+d+" يوم"];return["b-g","صالح"]}
+function thumb(it){return it.img?'<img class="th" data-a="v" data-id="'+it.id+'" src="'+it.img+'">':'<div class="th ph" data-a="i" data-id="'+it.id+'">📷</div>'}
+function small(f){return new Promise(function(res,rej){var u=URL.createObjectURL(f),im=new Image();im.onload=function(){var m=360,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.72))};im.onerror=function(){rej(new Error("img"))};im.src=u})}
+function render(){
+  var q=norm($("srch").value),r=0,o=0,g=0,ER=[],EO=[],h="";
+  var arr=items.slice().sort(function(a,b){return String(a.expiry).localeCompare(String(b.expiry))});
+  arr.forEach(function(it){
+    var d=days(it.expiry);if(d!=null&&d<0){r+=it.qty;ER.push(it.name)}else if(d!=null&&d<=90){o+=it.qty;EO.push(it.name+" ("+d+" يوم)")}else g+=it.qty;
+    if(q&&norm(it.name+it.dci+((cls(it)||{}).u||"")+((cls(it)||{}).g||"")).indexOf(q)<0)return;
+    var s=status(it.expiry);
+    h+='<div class="card">'+thumb(it)+'<div class="m" data-a="e" data-id="'+it.id+'"><div class="nm"><bdi>'+esc(it.name)+(it.dosage?" "+esc(it.dosage):"")+'</bdi></div><div class="dt">'+esc(it.dci||"")+(it.form?" · "+esc(it.form):"")+'</div>'+usesLine(it)+'<div class="dt">الصلاحية: '+fmt(it.expiry)+(it.lot?" · lot "+esc(it.lot):"")+'</div><div style="margin-top:6px"><span class="badge '+s[0]+'">'+s[1]+'</span></div></div>'+
+    '<div class="q"><button data-a="m" data-id="'+it.id+'">−</button><b>'+it.qty+'</b><button data-a="p" data-id="'+it.id+'">+</button></div></div>';
+  });
+  $("list").innerHTML=h||'<div class="empty">لا توجد أدوية بعد.<br>اضغط «مسح وإضافة» وصوّر ملصق العلبة.</div>';
+  $("al").innerHTML=(ER.length?'<div class="al s-r">⚠️ منتهية الصلاحية: '+esc(ER.join("، "))+'</div>':"")+(EO.length?'<div class="al s-o">⏳ تنتهي قريباً: '+esc(EO.join("، "))+'</div>':"");
+  $("cR").textContent=r;$("cO").textContent=o;$("cG").textContent=g;
+}
+function open(html){$("pane").innerHTML=html;$("sheet").classList.add("show")}
+function close(){$("sheet").classList.remove("show");pending=null;editing=null}
+function form(d,isRem){
+  d=d||{};curImg=d.img||"";formRem=isRem;
+  return '<h2 style="margin:0 0 4px">'+(editing?"تعديل بيانات الدواء":isRem?"إزالة دواء":"تأكيد بيانات الدواء")+'</h2><div class="msg" id="fm"></div>'+'<div class="row" style="align-items:center"><div style="flex:none;max-width:110px">'+(curImg?'<img id="fImg" class="th" src="'+curImg+'">':'<div id="fImg" class="th ph">📷</div>')+'</div><div><button id="fP" style="width:100%">📷 صورة العلبة</button>'+(srcImg?'<button id="fC" style="width:100%;margin-top:6px">✂︎ ضبط الإطار</button>':'')+'</div></div>'+
+  '<label>اسم الدواء</label><input id="fN" value="'+esc(d.name)+'">'+
+  '<div class="row"><div><label>المادة الفعالة</label><input id="fD" value="'+esc(d.dci)+'"></div><div><label>الجرعة</label><input id="fG" value="'+esc(d.dosage)+'"></div></div>'+
+  '<div class="row"><div><label>الشكل</label><input id="fF" value="'+esc(d.form)+'"></div><div><label>رقم الدفعة (Lot)</label><input id="fL" value="'+esc(d.lot)+'"></div></div>'+
+  '<div class="row"><div><label>تاريخ الانتهاء</label><input type="month" id="fE" value="'+esc(d.expiry)+'"></div><div><label>عدد العلب</label><input type="number" min="1" id="fQ" value="'+(d.qty||1)+'"></div></div>'+
+  '<div class="row" style="margin-top:16px"><button class="p" id="ok">'+(editing?"حفظ":isRem?"إزالة":"إضافة")+'</button><button id="cx">إلغاء</button>'+(editing?'<button class="d" id="dl">حذف</button>':'')+'</div>';
+}
+function read(){return{name:$("fN").value.trim(),dci:$("fD").value.trim(),dosage:$("fG").value.trim(),form:$("fF").value.trim(),lot:$("fL").value.trim(),expiry:$("fE").value,qty:Math.max(1,parseInt($("fQ").value)||1),img:curImg}}
+function find(d){
+  var n=norm(d.name),l=norm(d.lot);
+  var c=items.filter(function(i){return norm(i.name)===n&&norm(i.dosage)===norm(d.dosage)});
+  var x=c.filter(function(i){return l&&norm(i.lot)===l})[0]||c.filter(function(i){return i.expiry===d.expiry})[0]||c[0];
+  return x||null
+}
+function doAdd(d){
+  if(!d.name){return"أدخل اسم الدواء"}
+  var x=items.filter(function(i){return norm(i.name)===norm(d.name)&&norm(i.dosage)===norm(d.dosage)&&i.expiry===d.expiry})[0];
+  if(x){x.qty+=d.qty;if(d.img&&!x.img)x.img=d.img}else{d.id="m"+Date.now()+Math.floor(Math.random()*999);items.push(d)}
+  save();render();close();return""
+}
+function doEdit(d){if(!d.name)return"أدخل اسم الدواء";var it=editing;it.name=d.name;it.dci=d.dci;it.dosage=d.dosage;it.form=d.form;it.lot=d.lot;it.expiry=d.expiry;it.qty=d.qty;if(d.img)it.img=d.img;save();render();close();return""}
+function editItem(it){editing=it;srcImg="";open(form(it,false));wire(false)}
+function doRem(d){
+  var x=find(d);if(!x)return"هذا الدواء غير موجود في القائمة";
+  x.qty-=d.qty;if(x.qty<=0)items=items.filter(function(i){return i!==x});
+  save();render();close();return""
+}
+function wire(isRem){
+  $("cx").onclick=close;
+  $("fP").onclick=function(){imgCb=function(u){srcImg=u;editCrop()};$("imgf").value="";$("imgf").click()};
+  if($("fC"))$("fC").onclick=editCrop;
+  if($("dl"))$("dl").onclick=function(){if(confirm("حذف "+editing.name+" نهائيا؟")){items=items.filter(function(i){return i!==editing});save();render();close()}};
+  $("ok").onclick=function(){var d=read();var e=editing?doEdit(d):isRem?doRem(d):doAdd(d);if(e){$("fm").textContent=e;$("fm").className="msg err"}}
+}
+function big(f){return new Promise(function(res,rej){var u=URL.createObjectURL(f),im=new Image();im.onload=function(){var s=Math.min(1,1000/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.85))};im.onerror=function(){rej(new Error("img"))};im.src=u})}
+function cut(src,x,y,w,h){return new Promise(function(res){var im=new Image();im.onload=function(){var k=480/Math.max(w,h),c=document.createElement("canvas");c.width=Math.round(w*k);c.height=Math.round(h*k);c.getContext("2d").drawImage(im,x,y,w,h,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.8))};im.src=src})}
+function sq(src){return new Promise(function(res){var im=new Image();im.onload=function(){var cw=im.width,ch=im.height;var a=cropAR||4/3;if(cw/ch>a)cw=ch*a;else ch=cw/a;cut(src,(im.width-cw)/2,(im.height-ch)/2,cw,ch).then(res)};im.src=src})}
+function ratioBtns(){return '<div class="seg">'+[[0,"حر"],[4/3,"4:3"],[1,"مربع"],[3/4,"3:4"]].map(function(r){return '<button data-r="'+r[0]+'"'+(Math.abs((cropAR||0)-r[0])<.01?' class="on"':'')+'>'+r[1]+'</button>'}).join("")+'</div>'}
+function cropper(src,done,cancel){
+  var im=new Image();
+  im.onload=function(){
+    var IW=im.width,IH=im.height,SW=Math.min(340,window.innerWidth-48),fit=Math.min(SW/IW,SW/IH),vz=fit,vx=(SW-IW*vz)/2,vy=(SW-IH*vz)/2,P={},last=0,mode=null,R={x:0,y:0,w:IW,h:IH};
+    var HS=["nw","n","ne","e","se","s","sw","w"],hp={nw:[0,0],n:[.5,0],ne:[1,0],e:[1,.5],se:[1,1],s:[.5,1],sw:[0,1],w:[0,.5]};
+    open('<h2 style="margin:0 0 6px">ضبط إطار الصورة</h2><div class="msg">اسحب الحواف والزوايا لتغيير الإطار، واسحب داخله لتحريكه، واسحب خارجه لتحريك الصورة. كبّر أو صغّر بإصبعين أو بالمنزلق.</div>'+ratioBtns()+'<div id="cv" style="width:'+SW+'px;height:'+SW+'px;margin:0 auto;position:relative;overflow:hidden;border-radius:12px;background:#222;touch-action:none"><img id="ci" src="'+src+'" style="position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;width:'+IW+'px;height:'+IH+'px;pointer-events:none"><div id="rc" style="position:absolute;border:2px solid #fff;box-shadow:0 0 0 999px rgba(0,0,0,.5);box-sizing:border-box;background-image:linear-gradient(rgba(255,255,255,.35) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.35) 1px,transparent 1px);background-size:33.33% 33.33%">'+HS.map(function(h){return '<i data-h="'+h+'" style="position:absolute;width:32px;height:32px;margin:-16px 0 0 -16px;left:'+hp[h][0]*100+'%;top:'+hp[h][1]*100+'%;display:flex;align-items:center;justify-content:center"><b style="width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.4)"></b></i>'}).join("")+'</div></div><input type="range" id="zm" min="50" max="400" value="100" style="margin:14px 0;padding:0"><div class="row"><button id="rt">↻ تدوير</button><button class="p" id="ok2">تم</button><button id="cx2">إلغاء</button></div>');
+    var cv=$("cv"),ci=$("ci"),rc=$("rc"),zm=$("zm");
+    function draw(){ci.style.transform="translate("+vx+"px,"+vy+"px) scale("+vz+")";rc.style.left=vx+R.x*vz+"px";rc.style.top=vy+R.y*vz+"px";rc.style.width=R.w*vz+"px";rc.style.height=R.h*vz+"px";zm.value=Math.round(vz/fit*100)}
+    function lock(a){var w=R.w,h=R.h,cx=R.x+w/2,cy=R.y+h/2;if(w/h>a)w=h*a;else h=w/a;R={x:cx-w/2,y:cy-h/2,w:w,h:h}}
+    (function(){var a=cropAR||4/3,w=IW*.9,h=IH*.9;if(w/h>a)w=h*a;else h=w/a;R={x:(IW-w)/2,y:(IH-h)/2,w:w,h:h}})();
+    document.querySelectorAll(".seg button[data-r]").forEach(function(b){b.onclick=function(){cropAR=parseFloat(b.dataset.r);if(cropAR)lock(cropAR);document.querySelectorAll(".seg button[data-r]").forEach(function(x){x.className=x===b?"on":""});draw()}});
+    function resize(h,dx,dy){
+      var L=R.x,T=R.y,Rr=R.x+R.w,B=R.y+R.h,mn=24/vz,a=cropAR,cx=(L+Rr)/2,cy=(T+B)/2;
+      if(/w/.test(h))L=Math.min(Rr-mn,Math.max(0,L+dx));
+      if(/e/.test(h))Rr=Math.max(L+mn,Math.min(IW,Rr+dx));
+      if(/n/.test(h))T=Math.min(B-mn,Math.max(0,T+dy));
+      if(/s/.test(h))B=Math.max(T+mn,Math.min(IH,B+dy));
+      if(a){var hz=/[ew]/.test(h),vt=/[ns]/.test(h),w=Rr-L,hh=B-T;
+        if(hz){hh=w/a;if(vt){if(/n/.test(h))T=B-hh;else B=T+hh}else{T=cy-hh/2;B=T+hh}}
+        else{w=hh*a;L=cx-w/2;Rr=L+w}
+        if(L<0||T<0||Rr>IW||B>IH)return}
+      R={x:L,y:T,w:Rr-L,h:B-T}}
+    cv.onpointerdown=function(e){cv.setPointerCapture(e.pointerId);P[e.pointerId]=[e.clientX,e.clientY];last=0;if(Object.keys(P).length===1){var t=e.target.closest("i[data-h]");mode=t?t.dataset.h:(e.target.closest("#rc")?"move":"pan")}};
+    cv.onpointermove=function(e){
+      if(!P[e.pointerId])return;
+      var ids=Object.keys(P),o=P[e.pointerId],dx=e.clientX-o[0],dy=e.clientY-o[1];P[e.pointerId]=[e.clientX,e.clientY];
+      if(ids.length>1){var a=P[ids[0]],b=P[ids[1]],d=Math.hypot(a[0]-b[0],a[1]-b[1]);
+        if(last){var nz=Math.min(fit*4,Math.max(fit*.5,vz*d/last)),r=nz/vz,bb=cv.getBoundingClientRect(),px=(a[0]+b[0])/2-bb.left,py=(a[1]+b[1])/2-bb.top;vx=px-(px-vx)*r;vy=py-(py-vy)*r;vz=nz}
+        last=d}
+      else if(mode==="pan"){vx+=dx;vy+=dy}
+      else if(mode==="move"){R.x=Math.min(IW-R.w,Math.max(0,R.x+dx/vz));R.y=Math.min(IH-R.h,Math.max(0,R.y+dy/vz))}
+      else if(mode)resize(mode,dx/vz,dy/vz);
+      draw()};
+    cv.onpointerup=cv.onpointercancel=function(e){delete P[e.pointerId];last=0;mode=null};
+    zm.oninput=function(){var nz=fit*zm.value/100,r=nz/vz,c=SW/2;vx=c-(c-vx)*r;vy=c-(c-vy)*r;vz=nz;draw()};
+    $("rt").onclick=function(){var c=document.createElement("canvas");c.width=im.height;c.height=im.width;var g=c.getContext("2d");g.translate(c.width,0);g.rotate(Math.PI/2);g.drawImage(im,0,0);var u=c.toDataURL("image/jpeg",.85);srcImg=u;cropper(u,done,cancel)};
+    $("ok2").onclick=function(){cut(src,R.x,R.y,R.w,R.h).then(done)};
+    $("cx2").onclick=cancel;
+    draw()};
+  im.src=src}
+function editCrop(){var d=read();cropper(srcImg,function(r){d.img=r;open(form(d,formRem));wire(formRem)},function(){open(form(d,formRem));wire(formRem)})}
+function attach(it){imgCb=function(u){srcImg=u;cropper(u,function(r){it.img=r;save();render();close()},close)};$("imgf").value="";$("imgf").click()}
+function view(it){open('<img src="'+it.img+'" style="width:100%;border-radius:12px"><div class="row" style="margin-top:12px"><button id="chg">تغيير الصورة</button><button class="p" id="cx">إغلاق</button></div>');$("cx").onclick=close;$("chg").onclick=function(){close();attach(it)}}
+function manual(){srcImg="";editing=null;open(form({},false));wire(false)}
+function shrink(f){return new Promise(function(res,rej){
+  var u=URL.createObjectURL(f),im=new Image();
+  im.onload=function(){var m=1400,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(function(b){b?res(b):rej(new Error("img"))},"image/jpeg",.85)};
+  im.onerror=function(){rej(new Error("img"))};im.src=u})}
+var worker=null;
+function parse(t){
+  var L=t.split(/\n/).map(function(x){return x.trim()}).filter(Boolean),d={name:"",dci:"",dosage:"",form:"",lot:"",expiry:"",qty:1};
+  var ds=[],m,re=/(\d{1,2})\s*[\/\-.]\s*(20\d{2}|\d{2})\b/g;
+  while((m=re.exec(t))){var mo=+m[1],y=m[2].length===2?2000+ +m[2]:+m[2];if(mo>=1&&mo<=12)ds.push(y*100+mo)}
+  var ex=t.match(/(?:EXP|PER|P[e\u00e9]remption)\w*\s*[:.]?\s*(\d{1,2})\s*[\/\-.]\s*(20\d{2}|\d{2})/i);
+  var v=ex?(+(ex[2].length===2?2000+ +ex[2]:+ex[2]))*100+ +ex[1]:(ds.length?Math.max.apply(null,ds):0);
+  if(v)d.expiry=Math.floor(v/100)+"-"+("0"+(v%100)).slice(-2);
+  var lo=t.match(/\bLOT\s*[:.]?\s*([A-Z0-9]{2,})/i);if(lo)d.lot=lo[1];
+  var dz=t.match(/(\d+(?:[.,]\d+)?)\s*(mg|g|ml|%|\u00b5g|ui)\b/i);if(dz)d.dosage=dz[1]+" "+dz[2];
+  var dc=t.match(/DCI\s*[:.]?\s*([A-Za-z\u00c0-\u00ff]+)/i);if(dc)d.dci=dc[1];
+  var fm=t.match(/(comprim[e\u00e9]s?[^\n,]*|g[e\u00e9]lules?|gel\s+\w+|pommade|sirop|solution[^\n,]*|suppositoires?|poudre[^\n,]*)/i);if(fm)d.form=fm[1].trim();
+  var vi=-1;L.forEach(function(x,i){if(vi<0&&/vignette/i.test(x))vi=i});
+  var cand=(vi>=0?L.slice(vi+1,vi+4):L).filter(function(x){return /^[A-Za-z][A-Za-z0-9 \-]{2,}$/.test(x)&&!/vignette|labor|inpha|prix|ppa|lot|fab|exp/i.test(x)});
+  if(cand[0])d.name=cand[0].replace(/\s+\d+\s*(mg|g)?$/i,"");
+  return d}
+var PROMPT='هذه صورة علبة دواء (غالبا جزائرية، عليها ملصق vignette). استخرج البيانات وأعد JSON فقط بالشكل: {"name":"الاسم التجاري بحروف لاتينية","dci":"المادة الفعالة","dosage":"مثل 500 mg","form":"الشكل مثل comprimé","lot":"رقم الدفعة LOT","expiry":"YYYY-MM"}. تاريخ الانتهاء هو الحقل EXP أو PER وليس FAB (تاريخ الصنع). إن كان مكتوبا 03/2029 أو 03/29 فالنتيجة 2029-03. إن لم تجد قيمة اتركها نصا فارغا ولا تخمن.';
+function b64(b){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result.split(",")[1])};r.readAsDataURL(b)})}
+async function gem(b,k){
+  var pick=localStorage.getItem("gmodel"),ms=[pick,"gemini-3.6-flash","gemini-2.5-flash","gemini-3.8-flash"].filter(function(x,i,a){return x&&a.indexOf(x)===i});
+  var data=await b64(b),last="خطأ من Gemini",body=JSON.stringify({contents:[{parts:[{text:PROMPT},{inline_data:{mime_type:"image/jpeg",data:data}}]}],generationConfig:{responseMimeType:"application/json",temperature:0}});
+  for(var i=0;i<ms.length;i++){
+    for(var t=0;t<2;t++){
+      var r,j;
+      try{r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+ms[i]+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":k},body:body});j=await r.json().catch(function(){return{}})}
+      catch(e){last="تعذّر الاتصال بخوادم Google عبر "+ms[i]+" ("+(e&&e.message||"network")+")";await new Promise(function(z){setTimeout(z,1500)});continue}
+      if(r.ok){
+        var tx=j.candidates[0].content.parts[0].text,d=JSON.parse(tx.replace(/```json|```/g,""));
+        d.qty=1;d.name=d.name||"";d.expiry=/^\d{4}-\d{2}$/.test(d.expiry||"")?d.expiry:"";return d}
+      last=(j.error&&j.error.message)||last;
+      if(r.status===400||r.status===401||r.status===403)throw{message:last};
+      if(r.status===404)break;
+      await new Promise(function(z){setTimeout(z,1500)});
+    }
+  }
+  throw{message:last+" — إن تكرر: عطّل VPN/Private Relay/حاجب الإعلانات، أو بدّل بين Wi‑Fi والبيانات، ثم أعد المحاولة."}}
+async function scan(f){
+  open('<h2 style="margin:0">\u062c\u0627\u0631\u064a \u0642\u0631\u0627\u0621\u0629 \u0627\u0644\u0645\u0644\u0635\u0642\u2026</h2><div class="msg" id="pg">\u062a\u062d\u0645\u064a\u0644 \u0645\u062d\u0631\u0643 \u0627\u0644\u0642\u0631\u0627\u0621\u0629 (\u0623\u0648\u0644 \u0645\u0631\u0629 \u0642\u062f \u062a\u0633\u062a\u063a\u0631\u0642 \u0648\u0642\u062a\u0627\u064b)</div>');
+  try{
+    var bl=await shrink(f),d,gk=localStorage.getItem("gkey");
+    if(gk){d=await gem(bl,gk)}else{
+      if(!window.Tesseract)throw{message:"تعذّر تحميل محرك OCR. أضف مفتاح Gemini أو اتصل بالإنترنت."};
+      if(!worker)worker=await Tesseract.createWorker("fra");
+      var r=await worker.recognize(bl);d=parse(r.data.text||"")}
+    srcImg=await big(f).catch(function(){return""});d.img=srcImg?await sq(srcImg):"";open(form(d,mode==="rem"));wire(mode==="rem");
+    if(!d.expiry||!d.name){$("fm").textContent="\u0631\u0627\u062c\u0639 \u0627\u0644\u062d\u0642\u0648\u0644 \u0648\u0623\u0643\u0645\u0644 \u0645\u0627 \u0644\u0645 \u064a\u0642\u0631\u0623\u0647 \u0627\u0644\u062a\u0637\u0628\u064a\u0642.";$("fm").className="msg err"}
+  }catch(e){
+    open('<h2 style="margin:0 0 6px">\u062a\u0639\u0630\u0651\u0631\u062a \u0627\u0644\u0642\u0631\u0627\u0621\u0629</h2><div class="msg err">'+esc((e&&e.message)||"\u062e\u0637\u0623")+'</div><div class="row"><button class="p" id="mn">\u0625\u062f\u062e\u0627\u0644 \u064a\u062f\u0648\u064a</button><button id="cx">\u0625\u063a\u0644\u0627\u0642</button></div>');
+    $("cx").onclick=close;$("mn").onclick=manual}
+}
+$("bAdd").onclick=function(){mode="add";$("file").value="";$("file").click()};
+$("bRem").onclick=function(){mode="rem";$("file").value="";$("file").click()};
+$("bMan").onclick=manual;
+$("file").onchange=function(){if(this.files[0])scan(this.files[0])};
+$("srch").oninput=render;
+$("imgf").onchange=function(){var f=this.files[0];if(f&&imgCb)big(f).then(function(u){imgCb(u)}).catch(function(){alert("تعذّر قراءة الصورة")})};
+$("sheet").onclick=function(e){if(e.target===this)close()};
+$("list").onclick=function(e){
+  var b=e.target.closest("[data-a]");if(!b)return;
+  var it=items.filter(function(i){return i.id===b.dataset.id})[0];if(!it)return;
+  if(b.dataset.a==="e"){editItem(it);return}if(b.dataset.a==="v"){view(it);return}if(b.dataset.a==="i"){attach(it);return}if(b.dataset.a==="p")it.qty++;else{it.qty--;if(it.qty<=0&&confirm("إزالة "+it.name+" من القائمة؟"))items=items.filter(function(i){return i!==it});else if(it.qty<=0)it.qty=1}
+  save();render()
+};
+function icsText(){
+  var n=new Date(),p=function(x){return("0"+x).slice(-2)},st=""+n.getUTCFullYear()+p(n.getUTCMonth()+1)+p(n.getUTCDate())+"T"+p(n.getUTCHours())+p(n.getUTCMinutes())+"00Z",L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//meds//AR","CALSCALE:GREGORIAN"],c=0;
+  items.forEach(function(it){
+    var e=endOf(it.expiry);if(!e||e<n)return;c++;
+    var nx=new Date(e.getFullYear(),e.getMonth(),e.getDate()+1),f=function(d){return""+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())},t="انتهاء صلاحية: "+it.name+(it.dosage?" "+it.dosage:"");
+    L.push("BEGIN:VEVENT","UID:"+it.id+"@meds","DTSTAMP:"+st,"DTSTART;VALUE=DATE:"+f(e),"DTEND;VALUE=DATE:"+f(nx),"SUMMARY:"+t,"DESCRIPTION:"+(it.lot?"Lot "+it.lot:"")+" يُنصح بالتخلص من الدواء بعد هذا التاريخ.");
+    [["-P30D","بعد 30 يوما"],["-P7D","بعد 7 أيام"],["PT9H","اليوم"]].forEach(function(a){L.push("BEGIN:VALARM","TRIGGER:"+a[0],"ACTION:DISPLAY","DESCRIPTION:"+t+" ("+a[1]+")","END:VALARM")});
+    L.push("END:VEVENT")});
+  L.push("END:VCALENDAR");return c?L.join("\r\n"):""}
+$("ics").onclick=function(){var t=icsText();if(!t){alert("لا توجد أدوية بتواريخ انتهاء قادمة.");return}var u=URL.createObjectURL(new Blob([t],{type:"text/calendar"})),l=document.createElement("a");l.href=u;l.download="medicines-expiry.ics";l.click();setTimeout(function(){URL.revokeObjectURL(u)},1000)};
+function stOf(ym){var d=days(ym);if(d==null)return["#68766f","#eef1ef","غير معروف"];if(d<0)return["#c0392b","#fbe9e6","منتهي"];if(d<=90)return["#c77a0a","#fdf1de","ينتهي بعد "+d+" يوم"];return["#17795c","#e4f3ee","صالح"]}
+async function buildPdf(){
+  var list=items.slice().sort(function(a,b){return String(a.expiry||"9999").localeCompare(String(b.expiry||"9999"))});
+  var W=794,H=1123,wrap=document.createElement("div"),pages=[],cnt=[0,0,0,0];
+  wrap.style.cssText="position:absolute;left:-10000px;top:0";document.body.appendChild(wrap);
+  list.forEach(function(it){var d=days(it.expiry);if(d==null)cnt[3]++;else if(d<0)cnt[0]++;else if(d<=90)cnt[1]++;else cnt[2]++});
+  var F="font-family:system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;direction:rtl;color:#1d2b25;";
+  var dt=new Date().toLocaleDateString("fr-FR");
+  function chip(n,t,c,b){return '<div style="flex:1;background:'+b+';color:'+c+';border-radius:12px;padding:10px;text-align:center"><div style="font-size:22px;font-weight:800">'+n+'</div><div style="font-size:12px">'+t+'</div></div>'}
+  var HEAD='<div style="background:#17795c;color:#fff;border-radius:14px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:12px">'+(AV?'<img src="'+AV+'" style="width:66px;height:78px;border-radius:12px;object-fit:cover;object-position:top;border:3px solid #fff">':'')+'<div><div style="font-size:26px;font-weight:800">صيدلية البيت — قائمة الأدوية</div><div style="font-size:13px;opacity:.9;margin-top:4px">تاريخ التقرير: <bdi>'+dt+'</bdi></div></div></div><div style="text-align:center"><div style="font-size:34px;font-weight:800">'+list.length+'</div><div style="font-size:12px">دواء</div></div></div><div style="display:flex;gap:8px;margin:12px 0">'+chip(cnt[2],"صالحة","#17795c","#e4f3ee")+chip(cnt[1],"تنتهي خلال 90 يوماً","#c77a0a","#fdf1de")+chip(cnt[0],"منتهية","#c0392b","#fbe9e6")+chip(cnt[3],"بلا تاريخ","#68766f","#eef1ef")+'</div>';
+  var cs='padding:0 6px;text-align:center;';
+  var COLS='<div style="display:flex;align-items:center;background:#f1f4f2;border-radius:8px;padding:7px 10px;font-size:11px;color:#5b6a63;font-weight:700"><div style="width:96px;'+cs+'">الصورة</div><div style="flex:1;padding:0 6px">الدواء</div><div style="width:84px;'+cs+'">الدفعة</div><div style="width:84px;'+cs+'">الانتهاء</div><div style="width:46px;'+cs+'">العدد</div><div style="width:112px;'+cs+'">الحالة</div></div>';
+  function row(it){
+    var c=cls(it),s=stOf(it.expiry),ex=it.expiry?fmt(it.expiry):"—";
+    var im=it.img?'<img src="'+it.img+'" style="height:64px;max-width:92px;border-radius:7px;object-fit:cover">':'<div style="height:64px;width:64px;border-radius:7px;background:#eef1ef;margin:0 auto"></div>';
+    return '<div style="display:flex;align-items:center;padding:8px 10px;border-bottom:1px solid #e4e9e6;min-height:78px"><div style="width:96px;text-align:center">'+im+'</div><div style="flex:1;padding:0 6px"><div style="font-size:15px;font-weight:800"><bdi>'+esc(it.name)+(it.dosage?" "+esc(it.dosage):"")+'</bdi></div><div style="font-size:12px;color:#5b6a63;margin-top:3px"><bdi>'+esc([it.dci,it.form].filter(Boolean).join(" · "))+'</bdi></div>'+(c?'<div style="font-size:12px;color:#17795c;font-weight:700;margin-top:3px"><bdi>'+esc(c.u)+'</bdi></div>':'')+'</div><div style="width:84px;font-size:12px;'+cs+'"><bdi>'+esc(it.lot||"—")+'</bdi></div><div style="width:84px;font-size:14px;font-weight:800;'+cs+'"><bdi>'+ex+'</bdi></div><div style="width:46px;font-size:14px;'+cs+'">'+(it.qty||1)+'</div><div style="width:112px;'+cs+'"><span style="display:inline-block;background:'+s[1]+';color:'+s[0]+';border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700">'+s[2]+'</span></div></div>'}
+  function np(first){var p=document.createElement("div");p.style.cssText="width:"+W+"px;height:"+H+"px;box-sizing:border-box;padding:34px 36px 56px;background:#fff;position:relative;overflow:hidden;"+F;p.innerHTML=(first?HEAD:"")+COLS;wrap.appendChild(p);pages.push(p);return p}
+  var p=np(true);
+  list.forEach(function(it){
+    p.insertAdjacentHTML("beforeend",row(it));var r=p.lastElementChild;
+    if(r.getBoundingClientRect().bottom-p.getBoundingClientRect().top>H-60){r.remove();p=np(false);p.insertAdjacentHTML("beforeend",row(it))}});
+  pages.forEach(function(pg,i){pg.insertAdjacentHTML("beforeend",'<div style="position:absolute;bottom:20px;left:36px;right:36px;display:flex;justify-content:space-between;font-size:11px;color:#8a9892;border-top:1px solid #e4e9e6;padding-top:8px"><span>صيدلية البيت</span><span><bdi>'+(i+1)+' / '+pages.length+'</bdi></span></div>')});
+  await Promise.all(Array.from(wrap.querySelectorAll("img")).map(function(i){return i.decode?i.decode().catch(function(){}):0}));
+  var pdf=new window.jspdf.jsPDF({unit:"pt",format:"a4"});
+  for(var i=0;i<pages.length;i++){var c=await html2canvas(pages[i],{scale:2,backgroundColor:"#ffffff",useCORS:true});if(i)pdf.addPage();pdf.addImage(c.toDataURL("image/jpeg",.92),"JPEG",0,0,595.28,841.89)}
+  wrap.remove();return pdf.output("blob")}
+$("pdf").onclick=async function(){
+  if(!items.length){alert("القائمة فارغة.");return}
+  if(!window.html2canvas||!window.jspdf){alert("تعذّر تحميل أداة PDF. تحقق من الاتصال بالإنترنت ثم أعد فتح الصفحة.");return}
+  open('<h2 style="margin:0 0 6px">جاري إنشاء ملف PDF…</h2><div class="msg">قد يستغرق ذلك لحظات.</div>');
+  var blob;
+  try{blob=await buildPdf()}catch(e){open('<h2 style="margin:0 0 6px">تعذّر إنشاء الملف</h2><div class="msg err">'+esc(e&&e.message||"")+'</div><div class="row"><button id="cx">إغلاق</button></div>');$("cx").onclick=close;return}
+  open('<h2 style="margin:0 0 6px">الملف جاهز ✅</h2><div class="msg">'+Math.round(blob.size/1024)+' KB</div><div class="row" style="margin-top:12px"><button class="p" id="psv">حفظ / مشاركة</button><button id="cx">إغلاق</button></div>');
+  $("cx").onclick=close;
+  $("psv").onclick=function(){var f=new File([blob],"medicines-list.pdf",{type:"application/pdf"});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:"قائمة الأدوية"}).catch(function(){})}else{var u=URL.createObjectURL(blob),l=document.createElement("a");l.href=u;l.download="medicines-list.pdf";l.click();setTimeout(function(){URL.revokeObjectURL(u)},1500)}}
+};
+function showAv(){$("avw").innerHTML=AV?'<img class="av" src="'+AV+'">':'<div class="av">👤</div>'}
+function pickAv(){imgCb=function(u){var old=cropAR;cropAR=1;cropper(u,function(r){cropAR=old;AV=r;try{localStorage.setItem("meds-av",AV)}catch(e){}showAv();close()},function(){cropAR=old;close()})};$("imgf").value="";$("imgf").click()}
+$("avw").onclick=function(){
+  if(!AV){pickAv();return}
+  open('<img src="'+AV+'" style="width:70%;display:block;margin:0 auto;border-radius:18px"><div class="row" style="margin-top:14px"><button id="avc">تغيير الصورة</button><button id="avr">الافتراضية</button><button class="d" id="avd">إزالة</button><button id="cx">إغلاق</button></div>');
+  $("cx").onclick=close;$("avc").onclick=function(){close();pickAv()};$("avr").onclick=function(){try{localStorage.removeItem("meds-av")}catch(e){}AV=DEF;showAv();close()};$("avd").onclick=function(){AV="";try{localStorage.setItem("meds-av","-")}catch(e){}showAv();close()}};
+async function aiJson(p,imgs){
+  var k=localStorage.getItem("gkey");if(!k)throw{message:"أضف مفتاح Gemini من زر ⚙︎ أولاً لاستعمال هذه الميزة"};
+  var pick=localStorage.getItem("gmodel"),ms=[pick,"gemini-3.6-flash","gemini-2.5-flash","gemini-3.8-flash"].filter(function(x,i,a){return x&&a.indexOf(x)===i}),last="خطأ من Gemini",body;var parts=[{text:p}];if(imgs)for(var q=0;q<imgs.length;q++)parts.push({inline_data:{mime_type:"image/jpeg",data:await b64(imgs[q])}});body=JSON.stringify({contents:[{parts:parts}],generationConfig:{responseMimeType:"application/json",temperature:.2}});
+  for(var i=0;i<ms.length;i++){
+    try{
+      var r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+ms[i]+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":k},body:body}),j=await r.json().catch(function(){return{}});
+      if(r.ok)return JSON.parse(j.candidates[0].content.parts[0].text.replace(/```json|```/g,""));
+      last=(j.error&&j.error.message)||last;
+      if(r.status===400||r.status===401||r.status===403)throw{message:last,fatal:1}
+    }catch(e){if(e&&e.fatal)throw e;last=(e&&e.message)||last;await new Promise(function(z){setTimeout(z,1200)})}}
+  throw{message:last}}
+var GRP=["ألم وحمى","حساسية","المعدة والهضم","الجلد والفطريات","عدوى (مضادات حيوية)","الجهاز التنفسي والسعال","فيتامينات ومكملات","أخرى"];
+var DICT=[
+[/parac[eé]tamol|doliprane|paralgan|sabramol|efferalgan|dafalgan/i,["ألم وحمى","مسكن للألم وخافض للحرارة","لا تجمعه مع دواء آخر يحتوي باراسيتامول، والإفراط يضر الكبد"]],
+[/ibuprof[eè]ne|xydol|brufen|advil|nurofen/i,["ألم وحمى","مضاد التهاب ومسكن وخافض للحرارة","يؤخذ مع الأكل، ويتجنب في قرحة المعدة والحمل وأمراض الكلى إلا بإذن الطبيب"]],
+[/aspirin|ac[ei]de ac[eé]tylsalicylique|aspegic/i,["ألم وحمى","مسكن وخافض للحرارة ومميّع للدم","لا يعطى للأطفال دون استشارة الطبيب، وقد يهيّج المعدة"]],
+[/om[eé]prazole|pantoprazole|[eé]som[eé]prazole|zimor|mopral/i,["المعدة والهضم","يخفف حموضة المعدة والارتجاع وقرحة المعدة","للاستعمال لمدة محددة بتوجيه طبي"]],
+[/smecta|diosmectite|spasfon|phloroglucinol|domp[eé]ridone|lop[eé]ramide/i,["المعدة والهضم","للإسهال أو التقلصات أو الغثيان حسب الدواء","إن استمرت الأعراض أكثر من يومين راجع الطبيب"]],
+[/desloratadine|loratadine|c[eé]tirizine|deslor|aerius|clarityne|zyrtec/i,["حساسية","مضاد للهستامين لأعراض الحساسية والرشح التحسسي والحكة","قد يسبب نعاساً خفيفاً عند بعض الأشخاص"]],
+[/miconazole|daktazol|clotrimazole|fluconazole|k[eé]toconazole/i,["الجلد والفطريات","مضاد فطري لفطريات الفم أو الجلد حسب شكل الدواء","قد يتداخل مع بعض الأدوية مثل مميعات الدم، استشر الصيدلي"]],
+[/b[eé]tam[eé]thasone|betasone|hydrocortisone|clobetasol|diprosone/i,["الجلد والفطريات","كورتيكوستيرويد موضعي لالتهاب الجلد والأكزيما والحكة","لا يوضع على الوجه أو لمدة طويلة أو على جلد مصاب بعدوى إلا بإشراف الطبيب"]],
+[/amoxicilline|augmentin|azithromycine|ciprofloxacine|clarithromycine|c[eé]fixime/i,["عدوى (مضادات حيوية)","مضاد حيوي للعدوى البكتيرية","بوصفة طبية فقط، ويكمل كامل المدة"]],
+[/ambroxol|bromhexine|ac[eé]tylcyst[eé]ine|dextrom[eé]thorphane|salbutamol|sirop/i,["الجهاز التنفسي والسعال","لتخفيف السعال أو الإفرازات أو ضيق التنفس حسب الدواء","إن استمر السعال أكثر من أسبوع أو صاحبته حمى شديدة راجع الطبيب"]],
+[/vitamine|zinc|\bfer\b|calcium|magn[eé]sium|oméga/i,["فيتامينات ومكملات","مكمل غذائي","لا تتجاوز الجرعة المكتوبة على العلبة"]]];
+function usesLine(it){var c=cls(it);return c?'<div class="dt" style="color:var(--pri);font-weight:600"><bdi>'+esc(c.u)+'</bdi></div>':''}
+function ckey(it){return norm((it.dci||"")+(it.name||""))}
+function cmap(){try{return JSON.parse(localStorage.getItem("meds-cls")||"{}")||{}}catch(e){return{}}}
+function cls(it){var t=(it.dci||"")+" "+(it.name||"");for(var i=0;i<DICT.length;i++)if(DICT[i][0].test(t)){var d=DICT[i][1];return{g:d[0],u:d[1],c:d[2]}}return cmap()[ckey(it)]||null}
+function openCls(){
+  var by={},un=[];
+  items.forEach(function(it){var c=cls(it);if(!c){un.push(it);return}(by[c.g]=by[c.g]||[]).push([it,c])});
+  var h='<h2 style="margin:0 0 4px">🧠 تصنيف الأدوية</h2><div class="msg">معلومات عامة عن الاستعمال الشائع وليست وصفة طبية. استشر الطبيب أو الصيدلي قبل أي استعمال، خاصة للأطفال والحوامل ومرضى الكبد والكلى.</div><div class="row" style="align-items:center"><div><input id="qc" placeholder="ماذا أستعمل لـ… (صداع، حساسية، حرقة)؟"></div><button class="p" id="qb" style="flex:none">اسأل</button></div><div id="qr"></div>';
+  GRP.concat(Object.keys(by).filter(function(g){return GRP.indexOf(g)<0})).forEach(function(g){
+    if(!by[g])return;
+    h+='<h3 style="margin:14px 0 4px;font-size:15px">'+esc(g)+'</h3>'+by[g].map(function(x){var it=x[0],c=x[1],s=status(it.expiry);return '<div class="card" style="margin:6px 0"><div class="m"><div class="nm"><bdi>'+esc(it.name+(it.dosage?" "+it.dosage:""))+'</bdi></div><div class="dt">'+esc(c.u)+'</div><div class="dt" style="color:var(--org)">⚠️ '+esc(c.c)+'</div><div style="margin-top:6px"><span class="badge '+s[0]+'">'+s[1]+'</span></div></div></div>'}).join("")});
+  if(un.length)h+='<h3 style="margin:14px 0 4px;font-size:15px">غير مصنّف</h3><div class="dt"><bdi>'+esc(un.map(function(i){return i.name}).join("، "))+'</bdi></div><button id="ai" style="width:100%;margin-top:8px">تصنيف بالذكاء الاصطناعي ('+un.length+')</button>';
+  h+='<div class="row" style="margin-top:16px"><button id="cx">إغلاق</button></div>';
+  open(h);$("cx").onclick=close;
+  $("qb").onclick=async function(){
+    var q=$("qc").value.trim();if(!q)return;
+    $("qr").innerHTML='<div class="msg">جاري التحليل…</div>';
+    try{
+      var list=items.map(function(it){var d=days(it.expiry);return it.name+(it.dosage?" "+it.dosage:"")+" ("+(it.dci||"")+")"+(d!=null&&d<0?" [منتهي الصلاحية]":"")}).join("\n");
+      var r=await aiJson('أنت مساعد صيدلاني عام. لدى المستخدم هذه الأدوية في المنزل:\n'+list+'\n\nالمستخدم يسأل عن: "'+q+'".\nأعد JSON فقط بالشكل {"matches":[{"name":"اسم الدواء من القائمة فقط","why":"سبب مناسبته باختصار","caution":"أهم تحذير باختصار"}],"advice":"نصيحة قصيرة ومتى يجب مراجعة الطبيب"}.\nالقواعد: اختر من القائمة فقط؛ لا تقترح أي دواء منتهي الصلاحية؛ لا تذكر جرعات؛ إن لم يوجد دواء مناسب اترك matches فارغة؛ للأعراض الخطيرة أو الأطفال الصغار أو الحوامل انصح بمراجعة الطبيب أولاً. اكتب بالعربية.');
+      var m=(r&&r.matches)||[];
+      $("qr").innerHTML='<div style="margin:10px 0">'+(m.length?m.map(function(x){return '<div class="card" style="margin:6px 0"><div class="m"><div class="nm"><bdi>'+esc(x.name)+'</bdi></div><div class="dt">'+esc(x.why||"")+'</div><div class="dt" style="color:var(--org)">⚠️ '+esc(x.caution||"")+'</div></div></div>'}).join(""):'<div class="msg">لا يوجد في قائمتك دواء مناسب لذلك.</div>')+(r&&r.advice?'<div class="al s-o">'+esc(r.advice)+'</div>':'')+'</div>'
+    }catch(e){$("qr").innerHTML='<div class="msg err">'+esc((e&&e.message)||"تعذّر التحليل")+'</div>'}};
+  if($("ai"))$("ai").onclick=async function(){
+    this.disabled=true;this.textContent="جاري التصنيف…";
+    try{
+      var r=await aiJson('صنّف هذه الأدوية حسب الاستعمال الشائع:\n'+un.map(function(i){return i.name+(i.dosage?" "+i.dosage:"")+" ("+(i.dci||"")+")"}).join("\n")+'\nأعد JSON مصفوفة فقط [{"name":"","g":"واحدة بالضبط من: '+GRP.join(" | ")+'","u":"الاستعمال الشائع باختصار","c":"أهم تحذير باختصار"}] بالعربية وبدون جرعات.');
+      var arr=Array.isArray(r)?r:((r&&(r.items||r.medicines||r.result))||[]),m=cmap();
+      un.forEach(function(it,i){var x=arr.filter(function(y){return norm(y.name)===norm(it.name)})[0]||arr[i];if(x&&x.g)m[ckey(it)]={g:x.g,u:x.u||"",c:x.c||""}});
+      localStorage.setItem("meds-cls",JSON.stringify(m));openCls()
+    }catch(e){this.disabled=false;this.textContent="تعذّر التصنيف: "+((e&&e.message)||"")}}}
+$("cls").onclick=openCls;
+var RX=[],RXP='هذه صورة وصفة طبية (ordonnance)، قد تكون مطبوعة أو بخط اليد، بالفرنسية أو العربية. استخرج الأدوية الموصوفة فقط. أعد JSON فقط بالشكل {"items":[{"name":"الاسم كما هو مكتوب بحروف لاتينية","dci":"المادة الفعالة إن كانت مكتوبة أو معروفة بوضوح وإلا فارغة","dosage":"التركيز مثل 500 mg","form":"الشكل مثل comprimé أو sirop","instructions":"طريقة الاستعمال والمدة كما هي مكتوبة باختصار","uncertain":false}]}. ضع uncertain:true إن لم تكن متأكداً من قراءة الاسم واكتب أفضل قراءة ولا تخمّن بلا أساس. تجاهل اسم المريض والطبيب وأي بيانات شخصية ولا تدرجها.';
+function mt(a,b){return!!a&&!!b&&(a.indexOf(b)>=0||b.indexOf(a)>=0)}
+function nums(s){return(String(s||"").match(/\d+(?:[.,]\d+)?/g)||[]).join("|")}
+function rxMatch(p){
+  var nn=norm(p.name),nd=norm(p.dci),best=null;
+  items.forEach(function(it){
+    var d=days(it.expiry),ex=d!=null&&d<0,k=null,ni=norm(it.name),id=norm(it.dci);
+    if(nn.length>2&&mt(nn,ni))k="same";
+    else if(nd.length>3&&mt(nd,id))k="alt";
+    else if(nn.length>3&&mt(nn,id))k="alt";
+    if(!k)return;
+    var dose=(p.dosage&&it.dosage&&nums(p.dosage)!==nums(it.dosage))?1:0,sc=(k==="same"?20:10)+(ex?0:5)+(dose?0:2);
+    if(!best||sc>best.sc)best={it:it,k:k,ex:ex,dose:dose,sc:sc}});
+  return best}
+function rxStatus(p){
+  var m=rxMatch(p);if(!m)return["b-r","❌ غير متوفر، تحتاج شراءه"];
+  var nm=m.it.name+(m.it.dosage?" "+m.it.dosage:"");
+  if(m.ex)return["b-o","⚠️ موجود ("+nm+") لكنه منتهي الصلاحية، لا تستعمله"];
+  if(m.k==="same"&&!m.dose)return["b-g","✅ متوفر: "+nm+" · ينتهي "+fmt(m.it.expiry)];
+  if(m.k==="same")return["b-o","🔶 متوفر بتركيز مختلف: "+nm+"، اسأل الصيدلي"];
+  return["b-o","🔄 بديل بنفس المادة الفعالة: "+nm+(m.dose?" (تركيز مختلف)":"")+"، استشر الصيدلي قبل الاستبدال"]}
+function paintRx(){
+  var ok=0,miss=[];
+  RX.forEach(function(p,i){var s=rxStatus(p),m=rxMatch(p);if(m&&!m.ex)ok++;else miss.push(p.name+(p.dosage?" "+p.dosage:""));$("rs"+i).innerHTML='<span class="badge '+s[0]+'" style="white-space:normal;display:inline-block;line-height:1.6">'+esc(s[1])+'</span>'});
+  var e=$("rxs");e.className="al "+(miss.length?"s-o":"s-g");
+  e.innerHTML=miss.length?'لديك '+ok+' من '+RX.length+'. ناقص أو منتهي: <bdi>'+esc(miss.join("، "))+'</bdi>':'✅ كل أدوية الوصفة متوفرة عندك ('+RX.length+')';
+  e.dataset.miss=miss.join("\n")}
+function showRx(){
+  var h='<h2 style="margin:0 0 4px">📋 نتيجة مسح الوصفة</h2><div class="msg">راجع الأسماء وصحّح أي قراءة خاطئة، فقراءة الخط اليدوي قد تخطئ. هذه ليست استشارة طبية، فلا تغيّر الدواء أو الجرعة دون الصيدلي أو الطبيب.</div><div id="rxs" class="al"></div>';
+  RX.forEach(function(p,i){h+='<div class="card" style="display:block;margin:8px 0"><input data-i="'+i+'" value="'+esc(p.name)+'" style="font-weight:700"><div class="dt">'+esc([p.dosage,p.form].filter(Boolean).join(" · "))+'</div>'+(p.instructions?'<div class="dt">📝 '+esc(p.instructions)+'</div>':'')+(p.uncertain?'<div class="dt" style="color:var(--org)">⚠️ القراءة غير مؤكدة</div>':'')+'<div id="rs'+i+'" style="margin-top:6px"></div></div>'});
+  h+='<div class="row" style="margin-top:12px"><button class="p" id="rxc">نسخ / مشاركة الناقص</button><button id="cx">إغلاق</button></div>';
+  open(h);$("cx").onclick=close;
+  document.querySelectorAll("#pane input[data-i]").forEach(function(inp){inp.oninput=function(){RX[+inp.dataset.i].name=inp.value;paintRx()}});
+  $("rxc").onclick=function(){var t=($("rxs").dataset.miss||"").split("\n").filter(Boolean);if(!t.length){alert("لا يوجد ناقص.");return}var tx="أدوية ناقصة:\n- "+t.join("\n- ");if(navigator.share){navigator.share({text:tx}).catch(function(){})}else{var a=document.createElement("textarea");a.value=tx;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove();alert("تم النسخ.")}};
+  paintRx()}
+$("rx").onclick=function(){$("rxf").value="";$("rxf").click()};
+$("rxf").onchange=async function(){
+  var fs=Array.from(this.files).slice(0,3);if(!fs.length)return;
+  open('<h2 style="margin:0 0 6px">جاري قراءة الوصفة…</h2><div class="msg">قد يستغرق ذلك لحظات.</div>');
+  try{
+    var bl=[];for(var i=0;i<fs.length;i++)bl.push(await shrink(fs[i]));
+    var r=await aiJson(RXP,bl),arr=Array.isArray(r)?r:((r&&(r.items||r.medicines))||[]);
+    RX=arr.filter(function(x){return x&&x.name}).map(function(x){return{name:String(x.name),dci:x.dci||"",dosage:x.dosage||"",form:x.form||"",instructions:x.instructions||"",uncertain:!!x.uncertain}});
+    if(!RX.length){open('<h2 style="margin:0 0 6px">لم أجد أدوية في الصورة</h2><div class="msg">صوّر الوصفة بوضوح وإضاءة جيدة وجرّب مرة أخرى.</div><div class="row"><button id="cx">إغلاق</button></div>');$("cx").onclick=close;return}
+    showRx()
+  }catch(e){open('<h2 style="margin:0 0 6px">تعذّرت قراءة الوصفة</h2><div class="msg err">'+esc((e&&e.message)||"")+'</div><div class="row"><button id="cx">إغلاق</button></div>');$("cx").onclick=close}};
+$("bk").onclick=function(){var u=URL.createObjectURL(new Blob([JSON.stringify(items,null,1)],{type:"application/json"})),l=document.createElement("a");l.href=u;l.download="medicines-backup.json";l.click();setTimeout(function(){URL.revokeObjectURL(u)},1000)};
+$("gt").onclick=async function(){
+  var k=localStorage.getItem("gkey");
+  if(!k){alert("لم تُدخل مفتاحا بعد. اضغط ⚙︎ مفتاح Gemini.");return}
+  try{
+    var r=await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=100",{headers:{"x-goog-api-key":k}});
+    var j=await r.json().catch(function(){return{}});
+    if(!r.ok){alert("رفض Google الطلب: "+r.status+"\n"+((j.error&&j.error.message)||""));return}
+    var n=(j.models||[]).map(function(m){return m.name.replace("models/","")}).filter(function(x){return /gemini/.test(x)&&/flash/.test(x)&&!/image|tts|live|audio/.test(x)});
+    alert("الاتصال ناجح ✅ المفتاح يعمل.\nنماذج Flash المتاحة:\n"+n.slice(0,12).join("\n"))
+  }catch(e){alert("لا يصل المتصفح إلى Google: "+(e&&e.message||"network")+"\nجرّب تعطيل VPN/Private Relay أو حاجب الإعلانات أو غيّر الشبكة.")}
+};
+$("gs").onclick=function(){
+  var k=prompt("الصق مفتاح Gemini (يُحفظ في هذا المتصفح فقط). اتركه فارغا لحذفه.",localStorage.getItem("gkey")||"");
+  if(k===null)return;k=k.trim();
+  if(!k){localStorage.removeItem("gkey");alert("تم حذف المفتاح. سيُستعمل OCR.");return}
+  localStorage.setItem("gkey",k);
+  var m=prompt("اسم النموذج (غيّره فقط إن توقف القديم):",localStorage.getItem("gmodel")||"gemini-2.5-flash");
+  if(m&&m.trim())localStorage.setItem("gmodel",m.trim());
+  alert("تم الحفظ.")
+};
+$("rs").onclick=function(){$("restore").click()};
+$("restore").onchange=function(){
+  var f=this.files[0];if(!f)return;
+  f.text().then(function(t){var a=JSON.parse(t);if(Array.isArray(a)){items=a;save();render()}}).catch(function(){alert("ملف غير صالح")})
+};
+load();try{snap=JSON.parse(localStorage.getItem("meds-snap")||"{}")||{}}catch(e){snap={}}var av0=localStorage.getItem("meds-av");AV=av0===null?DEF:(av0==="-"?"":av0);showAv();render();initSync();if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});
+})();
+</script>
+</body>
+</html>
