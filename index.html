@@ -55,12 +55,12 @@ label{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
   <div class="st s-o"><b id="cO">0</b>تنتهي خلال 90 يوماً</div>
   <div class="st s-g"><b id="cG">0</b>صالحة</div>
 </div>
-<div id="al"></div><input id="srch" placeholder="بحث باسم الدواء أو المادة الفعالة…">
+<div id="val" class="dt" style="margin:-2px 0 10px"></div><div id="al"></div><input id="srch" placeholder="بحث باسم الدواء أو المادة الفعالة…"><div id="flt" class="row" style="margin:8px 0;display:none"><div><select id="fLoc"></select></div><div><select id="fWho"></select></div></div>
 <div id="list"></div>
 <div class="note">البيانات محفوظة في هذا المتصفح فقط. استعمل «نسخ احتياطي» للحفظ.</div>
 <div class="note"><a href="privacy.html" style="color:inherit">سياسة الخصوصية</a></div>
 <div class="note" id="sy"></div>
-<div class="note"><button id="gt">اختبار الاتصال</button> <button id="gs">⚙︎ مفتاح Gemini</button> <button id="sh">🔗 مشاركة</button> <button id="rx">📋 وصفة طبية</button> <button id="cls">🧠 تصنيف الأدوية</button> <button id="pdf">📄 تصدير PDF</button> <button id="ics">📅 تذكيرات التقويم</button> <button id="bk">نسخ احتياطي</button> <button id="rs">استعادة</button></div>
+<div class="note"><button id="gt">اختبار الاتصال</button> <button id="gs">⚙︎ مفتاح Gemini</button> <button id="sh">🔗 مشاركة</button> <button id="lg">🌐</button> <button id="rx">📋 وصفة طبية</button> <button id="cls">🧠 تصنيف الأدوية</button> <button id="pdf">📄 تصدير PDF</button> <button id="ics">📅 تذكيرات التقويم</button> <button id="bk">نسخ احتياطي</button> <button id="rs">استعادة</button></div>
 
 <div class="bar">
   <button class="p" id="bAdd">📷 مسح وإضافة</button>
@@ -82,7 +82,7 @@ label{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
 var KEY="meds-v1",curImg="",imgCb=null,AV="",DEF="",snap={},sync=null,pT=null,pushing=false,srcImg="",cropAR=4/3,formRem=false,editing=null,items=[],mode="add",pending=null;
 function load(){try{items=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){items=[]}}
 function hs(s){return s.length+":"+s.charCodeAt(10)+"."+s.charCodeAt(s.length>>1)+"."+s.charCodeAt(s.length-5)}
-function meta(it){return JSON.stringify([it.name||"",it.dci||"",it.dosage||"",it.form||"",it.lot||"",it.expiry||"",it.qty||0,it.iv||""])}
+function meta(it){return JSON.stringify([it.name||"",it.dci||"",it.dosage||"",it.form||"",it.lot||"",it.expiry||"",it.qty||0,it.iv||"",it.price||0,it.loc||"",it.who||""])}
 function store(){try{localStorage.setItem(KEY,JSON.stringify(items));localStorage.setItem("meds-snap",JSON.stringify(snap))}catch(e){}}
 function setSt(t){var e=$("sy");if(e)e.textContent=t}
 function tm(){return new Date().toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"})}
@@ -164,13 +164,14 @@ function render(){
   var arr=items.slice().sort(function(a,b){return String(a.expiry).localeCompare(String(b.expiry))});
   arr.forEach(function(it){
     var d=days(it.expiry);if(d!=null&&d<0){r+=it.qty;ER.push(it.name)}else if(d!=null&&d<=90){o+=it.qty;EO.push(it.name+" ("+d+" يوم)")}else g+=it.qty;
-    if(q&&norm(it.name+it.dci+((cls(it)||{}).u||"")+((cls(it)||{}).g||"")).indexOf(q)<0)return;
+    if(fl(it))return;if(q&&norm(it.name+it.dci+((cls(it)||{}).u||"")+((cls(it)||{}).g||"")).indexOf(q)<0)return;
     var s=status(it.expiry);
-    h+='<div class="card">'+thumb(it)+'<div class="m" data-a="e" data-id="'+it.id+'"><div class="nm"><bdi>'+esc(it.name)+(it.dosage?" "+esc(it.dosage):"")+'</bdi></div><div class="dt">'+esc(it.dci||"")+(it.form?" · "+esc(it.form):"")+'</div>'+usesLine(it)+'<div class="dt">الصلاحية: '+fmt(it.expiry)+(it.lot?" · lot "+esc(it.lot):"")+'</div><div style="margin-top:6px"><span class="badge '+s[0]+'">'+s[1]+'</span></div></div>'+
+    h+='<div class="card">'+thumb(it)+'<div class="m" data-a="e" data-id="'+it.id+'"><div class="nm"><bdi>'+esc(it.name)+(it.dosage?" "+esc(it.dosage):"")+'</bdi></div><div class="dt">'+esc(it.dci||"")+(it.form?" · "+esc(it.form):"")+'</div>'+usesLine(it)+'<div class="dt">الصلاحية: '+fmt(it.expiry)+(it.lot?" · lot "+esc(it.lot):"")+'</div>'+metaLine(it)+dupLine(it)+'<div style="margin-top:6px"><span class="badge '+s[0]+'">'+s[1]+'</span></div></div>'+
     '<div class="q"><button data-a="m" data-id="'+it.id+'">−</button><b>'+it.qty+'</b><button data-a="p" data-id="'+it.id+'">+</button></div></div>';
   });
   $("list").innerHTML=h||'<div class="empty">لا توجد أدوية بعد.<br>اضغط «مسح وإضافة» وصوّر ملصق العلبة.</div>';
   $("al").innerHTML=(ER.length?'<div class="al s-r">⚠️ منتهية الصلاحية: '+esc(ER.join("، "))+'</div>':"")+(EO.length?'<div class="al s-o">⏳ تنتهي قريباً: '+esc(EO.join("، "))+'</div>':"");
+  $("al").innerHTML+=dupBanner();$("val").innerHTML=valHtml();fillF();
   $("cR").textContent=r;$("cO").textContent=o;$("cG").textContent=g;
 }
 function open(html){$("pane").innerHTML=html;$("sheet").classList.add("show")}
@@ -182,9 +183,9 @@ function form(d,isRem){
   '<div class="row"><div><label>المادة الفعالة</label><input id="fD" value="'+esc(d.dci)+'"></div><div><label>الجرعة</label><input id="fG" value="'+esc(d.dosage)+'"></div></div>'+
   '<div class="row"><div><label>الشكل</label><input id="fF" value="'+esc(d.form)+'"></div><div><label>رقم الدفعة (Lot)</label><input id="fL" value="'+esc(d.lot)+'"></div></div>'+
   '<div class="row"><div><label>تاريخ الانتهاء</label><input type="month" id="fE" value="'+esc(d.expiry)+'"></div><div><label>عدد العلب</label><input type="number" min="1" id="fQ" value="'+(d.qty||1)+'"></div></div>'+
-  '<div class="row" style="margin-top:16px"><button class="p" id="ok">'+(editing?"حفظ":isRem?"إزالة":"إضافة")+'</button><button id="cx">إلغاء</button>'+(editing?'<button class="d" id="dl">حذف</button>':'')+'</div>';
+  '<div class="row"><div><label>السعر (دج)</label><input type="number" min="0" step="0.01" id="fPr" value="'+(d.price||"")+'"></div><div><label>مكان التخزين</label><input id="fLo" list="dlLo" value="'+esc(d.loc)+'"></div></div><label>الفرد (لمن الدواء)</label><input id="fWh" list="dlWh" value="'+esc(d.who)+'">'+dls()+'<div class="row" style="margin-top:16px"><button class="p" id="ok">'+(editing?"حفظ":isRem?"إزالة":"إضافة")+'</button><button id="cx">إلغاء</button>'+(editing?'<button class="d" id="dl">حذف</button>':'')+'</div>';
 }
-function read(){return{name:$("fN").value.trim(),dci:$("fD").value.trim(),dosage:$("fG").value.trim(),form:$("fF").value.trim(),lot:$("fL").value.trim(),expiry:$("fE").value,qty:Math.max(1,parseInt($("fQ").value)||1),img:curImg}}
+function read(){return{name:$("fN").value.trim(),dci:$("fD").value.trim(),dosage:$("fG").value.trim(),form:$("fF").value.trim(),lot:$("fL").value.trim(),expiry:$("fE").value,qty:Math.max(1,parseInt($("fQ").value)||1),img:curImg,price:parseFloat($("fPr").value)||0,loc:$("fLo").value.trim(),who:$("fWh").value.trim()}}
 function find(d){
   var n=norm(d.name),l=norm(d.lot);
   var c=items.filter(function(i){return norm(i.name)===n&&norm(i.dosage)===norm(d.dosage)});
@@ -194,10 +195,10 @@ function find(d){
 function doAdd(d){
   if(!d.name){return"أدخل اسم الدواء"}
   var x=items.filter(function(i){return norm(i.name)===norm(d.name)&&norm(i.dosage)===norm(d.dosage)&&i.expiry===d.expiry})[0];
-  if(x){x.qty+=d.qty;if(d.img&&!x.img)x.img=d.img}else{d.id="m"+Date.now()+Math.floor(Math.random()*999);items.push(d)}
+  if(x){x.qty+=d.qty;if(d.img&&!x.img)x.img=d.img;if(d.price&&!x.price)x.price=d.price;if(d.loc&&!x.loc)x.loc=d.loc;if(d.who&&!x.who)x.who=d.who}else{d.id="m"+Date.now()+Math.floor(Math.random()*999);items.push(d)}
   save();render();close();return""
 }
-function doEdit(d){if(!d.name)return"أدخل اسم الدواء";var it=editing;it.name=d.name;it.dci=d.dci;it.dosage=d.dosage;it.form=d.form;it.lot=d.lot;it.expiry=d.expiry;it.qty=d.qty;if(d.img)it.img=d.img;save();render();close();return""}
+function doEdit(d){if(!d.name)return"أدخل اسم الدواء";var it=editing;it.name=d.name;it.dci=d.dci;it.dosage=d.dosage;it.form=d.form;it.lot=d.lot;it.expiry=d.expiry;it.qty=d.qty;it.price=d.price;it.loc=d.loc;it.who=d.who;if(d.img)it.img=d.img;save();render();close();return""}
 function editItem(it){editing=it;srcImg="";open(form(it,false));wire(false)}
 function doRem(d){
   var x=find(d);if(!x)return"هذا الدواء غير موجود في القائمة";
@@ -277,9 +278,9 @@ function parse(t){
   var fm=t.match(/(comprim[e\u00e9]s?[^\n,]*|g[e\u00e9]lules?|gel\s+\w+|pommade|sirop|solution[^\n,]*|suppositoires?|poudre[^\n,]*)/i);if(fm)d.form=fm[1].trim();
   var vi=-1;L.forEach(function(x,i){if(vi<0&&/vignette/i.test(x))vi=i});
   var cand=(vi>=0?L.slice(vi+1,vi+4):L).filter(function(x){return /^[A-Za-z][A-Za-z0-9 \-]{2,}$/.test(x)&&!/vignette|labor|inpha|prix|ppa|lot|fab|exp/i.test(x)});
-  if(cand[0])d.name=cand[0].replace(/\s+\d+\s*(mg|g)?$/i,"");
+  var pp=t.match(/PPA\s*[:=]?\s*(\d+[.,]\d+)/i);if(pp)d.price=parseFloat(pp[1].replace(",","."));if(cand[0])d.name=cand[0].replace(/\s+\d+\s*(mg|g)?$/i,"");
   return d}
-var PROMPT='هذه صورة علبة دواء (غالبا جزائرية، عليها ملصق vignette). استخرج البيانات وأعد JSON فقط بالشكل: {"name":"الاسم التجاري بحروف لاتينية","dci":"المادة الفعالة","dosage":"مثل 500 mg","form":"الشكل مثل comprimé","lot":"رقم الدفعة LOT","expiry":"YYYY-MM"}. تاريخ الانتهاء هو الحقل EXP أو PER وليس FAB (تاريخ الصنع). إن كان مكتوبا 03/2029 أو 03/29 فالنتيجة 2029-03. إن لم تجد قيمة اتركها نصا فارغا ولا تخمن.';
+var PROMPT='هذه صورة علبة دواء (غالبا جزائرية، عليها ملصق vignette). استخرج البيانات وأعد JSON فقط بالشكل: {"name":"الاسم التجاري بحروف لاتينية","dci":"المادة الفعالة","dosage":"مثل 500 mg","form":"الشكل مثل comprimé","lot":"رقم الدفعة LOT","expiry":"YYYY-MM","price":"السعر PPA بالدينار رقماً فقط مثل 96.19"}. تاريخ الانتهاء هو الحقل EXP أو PER وليس FAB (تاريخ الصنع). إن كان مكتوبا 03/2029 أو 03/29 فالنتيجة 2029-03. إن لم تجد قيمة اتركها نصا فارغا ولا تخمن.';
 function b64(b){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result.split(",")[1])};r.readAsDataURL(b)})}
 async function gem(b,k){
   var pick=localStorage.getItem("gmodel"),ms=[pick,"gemini-3.6-flash","gemini-2.5-flash","gemini-3.8-flash"].filter(function(x,i,a){return x&&a.indexOf(x)===i});
@@ -291,7 +292,7 @@ async function gem(b,k){
       catch(e){last="تعذّر الاتصال بخوادم Google عبر "+ms[i]+" ("+(e&&e.message||"network")+")";await new Promise(function(z){setTimeout(z,1500)});continue}
       if(r.ok){
         var tx=j.candidates[0].content.parts[0].text,d=JSON.parse(tx.replace(/```json|```/g,""));
-        d.qty=1;d.name=d.name||"";d.expiry=/^\d{4}-\d{2}$/.test(d.expiry||"")?d.expiry:"";return d}
+        d.qty=1;d.price=parseFloat(String(d.price||"").replace(",","."))||0;d.name=d.name||"";d.expiry=/^\d{4}-\d{2}$/.test(d.expiry||"")?d.expiry:"";return d}
       last=(j.error&&j.error.message)||last;
       if(r.status===400||r.status===401||r.status===403)throw{message:last};
       if(r.status===404)break;
@@ -342,16 +343,16 @@ async function buildPdf(){
   var W=794,H=1123,wrap=document.createElement("div"),pages=[],cnt=[0,0,0,0];
   wrap.style.cssText="position:absolute;left:-10000px;top:0";document.body.appendChild(wrap);
   list.forEach(function(it){var d=days(it.expiry);if(d==null)cnt[3]++;else if(d<0)cnt[0]++;else if(d<=90)cnt[1]++;else cnt[2]++});
-  var F="font-family:system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;direction:rtl;color:#1d2b25;";
+  var F="font-family:system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;direction:"+(LANG==="ar"?"rtl":"ltr")+";color:#1d2b25;";
   var dt=new Date().toLocaleDateString("fr-FR");
   function chip(n,t,c,b){return '<div style="flex:1;background:'+b+';color:'+c+';border-radius:12px;padding:10px;text-align:center"><div style="font-size:22px;font-weight:800">'+n+'</div><div style="font-size:12px">'+t+'</div></div>'}
-  var HEAD='<div style="background:#17795c;color:#fff;border-radius:14px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:12px">'+(AV?'<img src="'+AV+'" style="width:66px;height:78px;border-radius:12px;object-fit:cover;object-position:top;border:3px solid #fff">':'')+'<div><div style="font-size:26px;font-weight:800">صيدلية البيت — قائمة الأدوية</div><div style="font-size:13px;opacity:.9;margin-top:4px">تاريخ التقرير: <bdi>'+dt+'</bdi></div></div></div><div style="text-align:center"><div style="font-size:34px;font-weight:800">'+list.length+'</div><div style="font-size:12px">دواء</div></div></div><div style="display:flex;gap:8px;margin:12px 0">'+chip(cnt[2],"صالحة","#17795c","#e4f3ee")+chip(cnt[1],"تنتهي خلال 90 يوماً","#c77a0a","#fdf1de")+chip(cnt[0],"منتهية","#c0392b","#fbe9e6")+chip(cnt[3],"بلا تاريخ","#68766f","#eef1ef")+'</div>';
+  var HEAD='<div style="background:#17795c;color:#fff;border-radius:14px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:12px">'+(AV?'<img src="'+AV+'" style="width:66px;height:78px;border-radius:12px;object-fit:cover;object-position:top;border:3px solid #fff">':'')+'<div><div style="font-size:26px;font-weight:800">صيدلية البيت — قائمة الأدوية</div><div style="font-size:13px;opacity:.9;margin-top:4px">تاريخ التقرير: <bdi>'+dt+'</bdi></div></div></div><div style="text-align:center"><div style="font-size:34px;font-weight:800">'+list.length+'</div><div style="font-size:12px">دواء</div></div></div><div style="display:flex;gap:8px;margin:12px 0">'+chip(cnt[2],"صالحة","#17795c","#e4f3ee")+chip(cnt[1],"تنتهي خلال 90 يوماً","#c77a0a","#fdf1de")+chip(cnt[0],"منتهية","#c0392b","#fbe9e6")+chip(cnt[3],"بلا تاريخ","#68766f","#eef1ef")+'</div>'+(valHtml()?'<div style="margin:0 0 10px;font-size:13px">'+valHtml()+'</div>':'');
   var cs='padding:0 6px;text-align:center;';
   var COLS='<div style="display:flex;align-items:center;background:#f1f4f2;border-radius:8px;padding:7px 10px;font-size:11px;color:#5b6a63;font-weight:700"><div style="width:96px;'+cs+'">الصورة</div><div style="flex:1;padding:0 6px">الدواء</div><div style="width:84px;'+cs+'">الدفعة</div><div style="width:84px;'+cs+'">الانتهاء</div><div style="width:46px;'+cs+'">العدد</div><div style="width:112px;'+cs+'">الحالة</div></div>';
   function row(it){
-    var c=cls(it),s=stOf(it.expiry),ex=it.expiry?fmt(it.expiry):"—";
+    var ml=[it.loc?"📍 "+it.loc:"",it.who?"👤 "+it.who:"",it.price?"💰 "+fnum(it.price)+" دج":""].filter(Boolean).join(" · "),c=cls(it),s=stOf(it.expiry),ex=it.expiry?fmt(it.expiry):"—";
     var im=it.img?'<img src="'+it.img+'" style="height:64px;max-width:92px;border-radius:7px;object-fit:cover">':'<div style="height:64px;width:64px;border-radius:7px;background:#eef1ef;margin:0 auto"></div>';
-    return '<div style="display:flex;align-items:center;padding:8px 10px;border-bottom:1px solid #e4e9e6;min-height:78px"><div style="width:96px;text-align:center">'+im+'</div><div style="flex:1;padding:0 6px"><div style="font-size:15px;font-weight:800"><bdi>'+esc(it.name)+(it.dosage?" "+esc(it.dosage):"")+'</bdi></div><div style="font-size:12px;color:#5b6a63;margin-top:3px"><bdi>'+esc([it.dci,it.form].filter(Boolean).join(" · "))+'</bdi></div>'+(c?'<div style="font-size:12px;color:#17795c;font-weight:700;margin-top:3px"><bdi>'+esc(c.u)+'</bdi></div>':'')+'</div><div style="width:84px;font-size:12px;'+cs+'"><bdi>'+esc(it.lot||"—")+'</bdi></div><div style="width:84px;font-size:14px;font-weight:800;'+cs+'"><bdi>'+ex+'</bdi></div><div style="width:46px;font-size:14px;'+cs+'">'+(it.qty||1)+'</div><div style="width:112px;'+cs+'"><span style="display:inline-block;background:'+s[1]+';color:'+s[0]+';border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700">'+s[2]+'</span></div></div>'}
+    return '<div style="display:flex;align-items:center;padding:8px 10px;border-bottom:1px solid #e4e9e6;min-height:78px"><div style="width:96px;text-align:center">'+im+'</div><div style="flex:1;padding:0 6px"><div style="font-size:15px;font-weight:800"><bdi>'+esc(it.name)+(it.dosage?" "+esc(it.dosage):"")+'</bdi></div><div style="font-size:12px;color:#5b6a63;margin-top:3px"><bdi>'+esc([it.dci,it.form].filter(Boolean).join(" · "))+'</bdi></div>'+(c?'<div style="font-size:12px;color:#17795c;font-weight:700;margin-top:3px"><bdi>'+esc(c.u)+'</bdi></div>':'')+(ml?'<div style="font-size:11px;color:#5b6a63;margin-top:3px"><bdi>'+esc(ml)+'</bdi></div>':'')+'</div><div style="width:84px;font-size:12px;'+cs+'"><bdi>'+esc(it.lot||"—")+'</bdi></div><div style="width:84px;font-size:14px;font-weight:800;'+cs+'"><bdi>'+ex+'</bdi></div><div style="width:46px;font-size:14px;'+cs+'">'+(it.qty||1)+'</div><div style="width:112px;'+cs+'"><span style="display:inline-block;background:'+s[1]+';color:'+s[0]+';border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700">'+s[2]+'</span></div></div>'}
   function np(first){var p=document.createElement("div");p.style.cssText="width:"+W+"px;height:"+H+"px;box-sizing:border-box;padding:34px 36px 56px;background:#fff;position:relative;overflow:hidden;"+F;p.innerHTML=(first?HEAD:"")+COLS;wrap.appendChild(p);pages.push(p);return p}
   var p=np(true);
   list.forEach(function(it){
@@ -421,14 +422,14 @@ function openCls(){
     $("qr").innerHTML='<div class="msg">جاري التحليل…</div>';
     try{
       var list=items.map(function(it){var d=days(it.expiry);return it.name+(it.dosage?" "+it.dosage:"")+" ("+(it.dci||"")+")"+(d!=null&&d<0?" [منتهي الصلاحية]":"")}).join("\n");
-      var r=await aiJson('أنت مساعد صيدلاني عام. لدى المستخدم هذه الأدوية في المنزل:\n'+list+'\n\nالمستخدم يسأل عن: "'+q+'".\nأعد JSON فقط بالشكل {"matches":[{"name":"اسم الدواء من القائمة فقط","why":"سبب مناسبته باختصار","caution":"أهم تحذير باختصار"}],"advice":"نصيحة قصيرة ومتى يجب مراجعة الطبيب"}.\nالقواعد: اختر من القائمة فقط؛ لا تقترح أي دواء منتهي الصلاحية؛ لا تذكر جرعات؛ إن لم يوجد دواء مناسب اترك matches فارغة؛ للأعراض الخطيرة أو الأطفال الصغار أو الحوامل انصح بمراجعة الطبيب أولاً. اكتب بالعربية.');
+      var r=await aiJson('أنت مساعد صيدلاني عام. لدى المستخدم هذه الأدوية في المنزل:\n'+list+'\n\nالمستخدم يسأل عن: "'+q+'".\nأعد JSON فقط بالشكل {"matches":[{"name":"اسم الدواء من القائمة فقط","why":"سبب مناسبته باختصار","caution":"أهم تحذير باختصار"}],"advice":"نصيحة قصيرة ومتى يجب مراجعة الطبيب"}.\nالقواعد: اختر من القائمة فقط؛ لا تقترح أي دواء منتهي الصلاحية؛ لا تذكر جرعات؛ إن لم يوجد دواء مناسب اترك matches فارغة؛ للأعراض الخطيرة أو الأطفال الصغار أو الحوامل انصح بمراجعة الطبيب أولاً. اكتب بـ'+LN()+'.');
       var m=(r&&r.matches)||[];
       $("qr").innerHTML='<div style="margin:10px 0">'+(m.length?m.map(function(x){return '<div class="card" style="margin:6px 0"><div class="m"><div class="nm"><bdi>'+esc(x.name)+'</bdi></div><div class="dt">'+esc(x.why||"")+'</div><div class="dt" style="color:var(--org)">⚠️ '+esc(x.caution||"")+'</div></div></div>'}).join(""):'<div class="msg">لا يوجد في قائمتك دواء مناسب لذلك.</div>')+(r&&r.advice?'<div class="al s-o">'+esc(r.advice)+'</div>':'')+'</div>'
     }catch(e){$("qr").innerHTML='<div class="msg err">'+esc((e&&e.message)||"تعذّر التحليل")+'</div>'}};
   if($("ai"))$("ai").onclick=async function(){
     this.disabled=true;this.textContent="جاري التصنيف…";
     try{
-      var r=await aiJson('صنّف هذه الأدوية حسب الاستعمال الشائع:\n'+un.map(function(i){return i.name+(i.dosage?" "+i.dosage:"")+" ("+(i.dci||"")+")"}).join("\n")+'\nأعد JSON مصفوفة فقط [{"name":"","g":"واحدة بالضبط من: '+GRP.join(" | ")+'","u":"الاستعمال الشائع باختصار","c":"أهم تحذير باختصار"}] بالعربية وبدون جرعات.');
+      var r=await aiJson('صنّف هذه الأدوية حسب الاستعمال الشائع:\n'+un.map(function(i){return i.name+(i.dosage?" "+i.dosage:"")+" ("+(i.dci||"")+")"}).join("\n")+'\nأعد JSON مصفوفة فقط [{"name":"","g":"واحدة بالضبط من: '+GRP.join(" | ")+'","u":"الاستعمال الشائع باختصار","c":"أهم تحذير باختصار"}] بـ'+LN()+' وبدون جرعات.');
       var arr=Array.isArray(r)?r:((r&&(r.items||r.medicines||r.result))||[]),m=cmap();
       un.forEach(function(it,i){var x=arr.filter(function(y){return norm(y.name)===norm(it.name)})[0]||arr[i];if(x&&x.g)m[ckey(it)]={g:x.g,u:x.u||"",c:x.c||""}});
       localStorage.setItem("meds-cls",JSON.stringify(m));openCls()
@@ -480,6 +481,120 @@ $("rxf").onchange=async function(){
     if(!RX.length){open('<h2 style="margin:0 0 6px">لم أجد أدوية في الصورة</h2><div class="msg">صوّر الوصفة بوضوح وإضاءة جيدة وجرّب مرة أخرى.</div><div class="row"><button id="cx">إغلاق</button></div>');$("cx").onclick=close;return}
     showRx()
   }catch(e){open('<h2 style="margin:0 0 6px">تعذّرت قراءة الوصفة</h2><div class="msg err">'+esc((e&&e.message)||"")+'</div><div class="row"><button id="cx">إغلاق</button></div>');$("cx").onclick=close}};
+function fnum(v){return Math.round(v).toLocaleString("fr-FR")}
+function uniq(k){var a=[];items.forEach(function(i){if(i[k]&&a.indexOf(i[k])<0)a.push(i[k])});return a.sort()}
+function metaLine(it){var a=[];if(it.loc)a.push("📍 "+esc(it.loc));if(it.who)a.push("👤 "+esc(it.who));if(it.price)a.push("💰 "+fnum(it.price)+" دج");return a.length?'<div class="dt"><bdi>'+a.join(" · ")+'</bdi></div>':''}
+function dupOf(it){var d=norm(it.dci);return d.length>3?items.filter(function(o){return o.id!==it.id&&norm(o.dci)===d&&norm(o.name)!==norm(it.name)}):[]}
+function dupLine(it){var x=dupOf(it);return x.length?'<div class="dt" style="color:var(--org)">🔁 نفس المادة الفعالة أيضاً في: <bdi>'+esc(x.map(function(o){return o.name}).join("، "))+'</bdi></div>':''}
+function dupBanner(){var g={},h="";items.forEach(function(it){var d=norm(it.dci);if(d.length>3)(g[d]=g[d]||[]).push(it)});Object.keys(g).forEach(function(k){var ns=[];g[k].forEach(function(i){if(ns.indexOf(i.name)<0)ns.push(i.name)});if(ns.length>1)h+='<div class="al s-o">🔁 تكرار المادة الفعالة ('+esc(g[k][0].dci)+'): <bdi>'+esc(ns.join("، "))+'</bdi>. لا تجمع بينها في اليوم نفسه دون استشارة الصيدلي.</div>'});return h}
+function valHtml(){var t=0,e=0;items.forEach(function(it){var v=(it.price||0)*(it.qty||1);t+=v;var d=days(it.expiry);if(d!=null&&d<0)e+=v});return t?'💰 قيمة الأدوية: <bdi>'+fnum(t)+' دج</bdi>'+(e?' · منتهية: <bdi>'+fnum(e)+' دج</bdi>':''):''}
+function fillF(){var l=uniq("loc"),w=uniq("who"),a=$("fLoc"),b=$("fWho"),va=a.value,vb=b.value,o=function(x){return'<option>'+esc(x)+'</option>'};
+  a.innerHTML='<option value="">كل الأماكن</option>'+l.map(o).join("");b.innerHTML='<option value="">كل الأفراد</option>'+w.map(o).join("");
+  a.value=l.indexOf(va)>=0?va:"";b.value=w.indexOf(vb)>=0?vb:"";$("flt").style.display=(l.length||w.length)?"flex":"none"}
+function fl(it){var a=$("fLoc").value,b=$("fWho").value;return(a&&it.loc!==a)||(b&&it.who!==b)}
+function dls(){var L=LANG==="fr"?["Réfrigérateur","Placard cuisine","Trousse de secours","Chambre","Sac de voyage"]:LANG==="en"?["Fridge","Kitchen cabinet","First-aid kit","Bedroom","Travel bag"]:["ثلاجة","خزانة المطبخ","حقيبة الإسعاف","غرفة النوم","حقيبة السفر"];uniq("loc").forEach(function(x){if(L.indexOf(x)<0)L.push(x)});var op=function(x){return'<option value="'+esc(x)+'">'};return'<datalist id="dlLo">'+L.map(op).join("")+'</datalist><datalist id="dlWh">'+uniq("who").map(op).join("")+'</datalist>'}
+var LANG=localStorage.getItem("meds-lang")||"ar";
+var TR=[
+["صيدلية البيت — قائمة الأدوية","Pharmacie de la Maison — Liste des médicaments","Home Pharmacy — Medicine list"],
+["صيدلية البيت","Pharmacie de la Maison","Home Pharmacy"],
+["قائمة الأدوية المتوفرة مع تواريخ انتهاء الصلاحية","Médicaments disponibles et dates de péremption","Available medicines and expiry dates"],
+["تنتهي خلال 90 يوماً","Expirent sous 90 j","Expire within 90 days"],
+["منتهية","Périmés","Expired"],["صالحة","Valides","Valid"],["صالح","Valide","Valid"],["غير معروف","Inconnu","Unknown"],
+["بحث باسم الدواء أو المادة الفعالة…","Rechercher un médicament ou un principe actif…","Search by medicine or active ingredient…"],
+["كل الأماكن","Tous les lieux","All places"],["كل الأفراد","Toutes les personnes","Everyone"],
+["مسح وإضافة","Scanner et ajouter","Scan & add"],["مسح وإزالة","Scanner et retirer","Scan & remove"],["＋ يدوي","＋ Manuel","＋ Manual"],
+["وصفة طبية","Ordonnance","Prescription"],["تصنيف الأدوية","Classer les médicaments","Classify medicines"],["تصدير PDF","Exporter en PDF","Export PDF"],
+["تذكيرات التقويم","Rappels calendrier","Calendar reminders"],["مشاركة","Partager","Share"],["مفتاح Gemini","Clé Gemini","Gemini key"],
+["اختبار الاتصال","Tester la connexion","Test connection"],["سياسة الخصوصية","Politique de confidentialité","Privacy policy"],
+["نسخ احتياطي","Sauvegarde","Backup"],["استعادة","Restaurer","Restore"],
+["البيانات محفوظة في هذا المتصفح فقط. استعمل «نسخ احتياطي» للحفظ.","Données enregistrées uniquement sur cet appareil. Utilisez « Sauvegarde » pour les conserver.","Data is stored on this device only. Use “Backup” to keep a copy."],
+["غير مصنّف","Non classé","Unclassified"],["الصلاحية:","Péremption :","Expiry:"],
+["منتهية الصلاحية:","Périmés :","Expired:"],["تنتهي قريباً:","Expirent bientôt :","Expiring soon:"],
+["قيمة الأدوية:","Valeur des médicaments :","Medicines value:"],["منتهية:","périmés :","expired:"],
+["نفس المادة الفعالة أيضاً في:","Même principe actif aussi dans :","Same active ingredient also in:"],
+["تكرار المادة الفعالة","Doublon de principe actif","Duplicate active ingredient"],
+["لا تجمع بينها في اليوم نفسه دون استشارة الصيدلي.","Ne les associez pas le même jour sans l'avis du pharmacien.","Do not combine them on the same day without asking a pharmacist."],
+["لا توجد أدوية بعد.","Aucun médicament pour l'instant.","No medicines yet."],
+["اضغط «مسح وإضافة» وصوّر ملصق العلبة.","Appuyez sur « Scanner et ajouter » et photographiez l'étiquette.","Tap “Scan & add” and photograph the box label."],
+["تأكيد بيانات الدواء","Confirmer les données","Confirm medicine details"],["إزالة دواء","Retirer un médicament","Remove a medicine"],["تعديل بيانات الدواء","Modifier le médicament","Edit medicine"],
+["اسم الدواء","Nom du médicament","Medicine name"],["المادة الفعالة","Principe actif","Active ingredient"],["الجرعة","Dosage","Dose"],["الشكل","Forme","Form"],
+["رقم الدفعة (Lot)","N° de lot","Lot number"],["تاريخ الانتهاء","Date de péremption","Expiry date"],["عدد العلب","Nombre de boîtes","Boxes"],
+["السعر (دج)","Prix (DA)","Price (DZD)"],["مكان التخزين","Lieu de stockage","Storage place"],["الفرد (لمن الدواء)","Personne concernée","Person (whose medicine)"],
+["صورة العلبة","Photo de la boîte","Box photo"],["ضبط الإطار","Cadrer","Adjust frame"],["أدخل اسم الدواء","Saisissez le nom du médicament","Enter the medicine name"],
+["هذا الدواء غير موجود في القائمة","Ce médicament n'est pas dans la liste","This medicine is not in the list"],
+["جاري قراءة الملصق…","Lecture de l'étiquette…","Reading the label…"],["تعذّرت القراءة","Lecture impossible","Could not read"],["إدخال يدوي","Saisie manuelle","Manual entry"],
+["تم","OK","Done"],["إلغاء","Annuler","Cancel"],["إغلاق","Fermer","Close"],["حفظ","Enregistrer","Save"],["حذف","Supprimer","Delete"],["إضافة","Ajouter","Add"],["إزالة","Retirer","Remove"],["اسأل","Demander","Ask"],["ربط","Lier","Link"],["أخرى","Autres","Other"],
+["حر","Libre","Free"],["مربع","Carré","Square"],["↻ تدوير","↻ Pivoter","↻ Rotate"],["ضبط إطار الصورة","Cadrage de l'image","Adjust image frame"],
+["اسحب الحواف والزوايا لتغيير الإطار، واسحب داخله لتحريكه، واسحب خارجه لتحريك الصورة. كبّر أو صغّر بإصبعين أو بالمنزلق.","Faites glisser les bords et les coins pour redimensionner le cadre, l'intérieur pour le déplacer, l'extérieur pour déplacer l'image. Zoomez à deux doigts ou avec le curseur.","Drag edges and corners to resize the frame, inside to move it, outside to move the image. Zoom with two fingers or the slider."],
+["ألم وحمى","Douleur et fièvre","Pain & fever"],["حساسية","Allergie","Allergy"],["المعدة والهضم","Estomac et digestion","Stomach & digestion"],["الجلد والفطريات","Peau et mycoses","Skin & fungal"],["عدوى (مضادات حيوية)","Infections (antibiotiques)","Infections (antibiotics)"],["الجهاز التنفسي والسعال","Respiratoire et toux","Respiratory & cough"],["فيتامينات ومكملات","Vitamines et compléments","Vitamins & supplements"],
+["مسكن للألم وخافض للحرارة","Antalgique et antipyrétique","Pain reliever and fever reducer"],
+["لا تجمعه مع دواء آخر يحتوي باراسيتامول، والإفراط يضر الكبد","Ne pas l'associer à un autre médicament contenant du paracétamol ; un excès nuit au foie","Do not combine with another paracetamol product; overdose harms the liver"],
+["مضاد التهاب ومسكن وخافض للحرارة","Anti-inflammatoire, antalgique et antipyrétique","Anti-inflammatory, pain reliever and fever reducer"],
+["يؤخذ مع الأكل، ويتجنب في قرحة المعدة والحمل وأمراض الكلى إلا بإذن الطبيب","À prendre pendant le repas ; à éviter en cas d'ulcère, de grossesse ou de maladie rénale sauf avis médical","Take with food; avoid with stomach ulcer, pregnancy or kidney disease unless a doctor agrees"],
+["مسكن وخافض للحرارة ومميّع للدم","Antalgique, antipyrétique et fluidifiant du sang","Pain reliever, fever reducer and blood thinner"],
+["لا يعطى للأطفال دون استشارة الطبيب، وقد يهيّج المعدة","Ne pas donner aux enfants sans avis médical ; peut irriter l'estomac","Not for children without medical advice; may irritate the stomach"],
+["يخفف حموضة المعدة والارتجاع وقرحة المعدة","Réduit l'acidité gastrique, le reflux et l'ulcère","Reduces stomach acid, reflux and ulcers"],
+["للاستعمال لمدة محددة بتوجيه طبي","À utiliser pour une durée limitée sur avis médical","Use for a limited time as directed by a doctor"],
+["للإسهال أو التقلصات أو الغثيان حسب الدواء","Contre la diarrhée, les crampes ou les nausées selon le médicament","For diarrhea, cramps or nausea depending on the medicine"],
+["إن استمرت الأعراض أكثر من يومين راجع الطبيب","Si les symptômes durent plus de 2 jours, consultez un médecin","See a doctor if symptoms last more than 2 days"],
+["مضاد للهستامين لأعراض الحساسية والرشح التحسسي والحكة","Antihistaminique contre l'allergie, le rhume allergique et les démangeaisons","Antihistamine for allergy, hay fever and itching"],
+["قد يسبب نعاساً خفيفاً عند بعض الأشخاص","Peut provoquer une légère somnolence chez certaines personnes","May cause mild drowsiness in some people"],
+["مضاد فطري لفطريات الفم أو الجلد حسب شكل الدواء","Antifongique pour la bouche ou la peau selon la forme","Antifungal for the mouth or skin depending on the form"],
+["قد يتداخل مع بعض الأدوية مثل مميعات الدم، استشر الصيدلي","Peut interagir avec certains médicaments (anticoagulants) ; demandez au pharmacien","May interact with some medicines (e.g. blood thinners); ask a pharmacist"],
+["كورتيكوستيرويد موضعي لالتهاب الجلد والأكزيما والحكة","Corticoïde local pour dermatites, eczéma et démangeaisons","Topical corticosteroid for dermatitis, eczema and itching"],
+["لا يوضع على الوجه أو لمدة طويلة أو على جلد مصاب بعدوى إلا بإشراف الطبيب","Ne pas appliquer sur le visage, longtemps ou sur une peau infectée sans avis médical","Do not apply to the face, for long periods or on infected skin without medical supervision"],
+["مضاد حيوي للعدوى البكتيرية","Antibiotique contre les infections bactériennes","Antibiotic for bacterial infections"],
+["بوصفة طبية فقط، ويكمل كامل المدة","Uniquement sur ordonnance, à poursuivre jusqu'au bout","Prescription only; complete the full course"],
+["لتخفيف السعال أو الإفرازات أو ضيق التنفس حسب الدواء","Soulage la toux, les sécrétions ou l'essoufflement selon le médicament","Relieves cough, mucus or shortness of breath depending on the medicine"],
+["إن استمر السعال أكثر من أسبوع أو صاحبته حمى شديدة راجع الطبيب","Consultez si la toux dure plus d'une semaine ou s'accompagne de forte fièvre","See a doctor if cough lasts over a week or comes with high fever"],
+["مكمل غذائي","Complément alimentaire","Dietary supplement"],["لا تتجاوز الجرعة المكتوبة على العلبة","Ne dépassez pas la dose indiquée sur la boîte","Do not exceed the dose on the box"],
+["معلومات عامة عن الاستعمال الشائع وليست وصفة طبية. استشر الطبيب أو الصيدلي قبل أي استعمال، خاصة للأطفال والحوامل ومرضى الكبد والكلى.","Informations générales sur l'usage courant, pas une ordonnance. Consultez un médecin ou un pharmacien avant tout usage, surtout pour les enfants, les femmes enceintes et en cas de maladie du foie ou des reins.","General information on common use, not a prescription. Ask a doctor or pharmacist before use, especially for children, pregnancy, liver or kidney disease."],
+["ماذا أستعمل لـ… (صداع، حساسية، حرقة)؟","Que prendre pour… (maux de tête, allergie, brûlures) ?","What can I use for… (headache, allergy, heartburn)?"],
+["جاري التحليل…","Analyse en cours…","Analyzing…"],["لا يوجد في قائمتك دواء مناسب لذلك.","Aucun médicament adapté dans votre liste.","No suitable medicine in your list."],
+["تصنيف بالذكاء الاصطناعي","Classer avec l'IA","Classify with AI"],["جاري التصنيف…","Classement en cours…","Classifying…"],
+["نتيجة مسح الوصفة","Résultat du scan de l'ordonnance","Prescription scan result"],
+["راجع الأسماء وصحّح أي قراءة خاطئة، فقراءة الخط اليدوي قد تخطئ. هذه ليست استشارة طبية، فلا تغيّر الدواء أو الجرعة دون الصيدلي أو الطبيب.","Vérifiez les noms et corrigez toute erreur : la lecture de l'écriture manuscrite peut se tromper. Ce n'est pas un avis médical ; ne changez ni médicament ni dose sans pharmacien ou médecin.","Check the names and fix any misreading; handwriting can be misread. This is not medical advice; do not change medicine or dose without a pharmacist or doctor."],
+["غير متوفر، تحتاج شراءه","Non disponible, à acheter","Not available, you need to buy it"],["لكنه منتهي الصلاحية، لا تستعمله","mais périmé, ne l'utilisez pas","but expired, do not use it"],
+["موجود","Présent","Found"],["متوفر بتركيز مختلف:","Disponible à un autre dosage :","Available at a different strength:"],["متوفر:","Disponible :","Available:"],["اسأل الصيدلي","demandez au pharmacien","ask a pharmacist"],
+["بديل بنفس المادة الفعالة:","Alternative au même principe actif :","Alternative with the same active ingredient:"],["(تركيز مختلف)","(dosage différent)","(different strength)"],
+["استشر الصيدلي قبل الاستبدال","consultez le pharmacien avant de remplacer","ask a pharmacist before substituting"],
+["نسخ / مشاركة الناقص","Copier / partager les manquants","Copy / share missing items"],["ناقص أو منتهي:","Manquants ou périmés :","Missing or expired:"],
+["كل أدوية الوصفة متوفرة عندك","Tous les médicaments de l'ordonnance sont disponibles","All prescription medicines are available"],
+["القراءة غير مؤكدة","Lecture incertaine","Uncertain reading"],["جاري قراءة الوصفة…","Lecture de l'ordonnance…","Reading the prescription…"],
+["لم أجد أدوية في الصورة","Aucun médicament trouvé dans l'image","No medicines found in the image"],["تعذّرت قراءة الوصفة","Lecture de l'ordonnance impossible","Could not read the prescription"],
+["مشاركة القائمة","Partager la liste","Share the list"],["تفعيل المزامنة","Activer la synchronisation","Enable sync"],["إيقاف المزامنة على هذا الجهاز","Arrêter la synchronisation sur cet appareil","Stop sync on this device"],
+["المشاركة مفعّلة ✅","Partage activé ✅","Sharing enabled ✅"],["نسخ / إرسال","Copier / envoyer","Copy / send"],["متزامن","Synchronisé","Synced"],["تعذّرت المزامنة:","Échec de la synchronisation :","Sync failed:"],
+["جاري إنشاء ملف PDF…","Création du PDF…","Creating the PDF…"],["الملف جاهز ✅","Fichier prêt ✅","File ready ✅"],["حفظ / مشاركة","Enregistrer / partager","Save / share"],["قد يستغرق ذلك لحظات.","Cela peut prendre un moment.","This may take a moment."],
+["تعذّر إنشاء الملف","Création du fichier impossible","Could not create the file"],["القائمة فارغة.","La liste est vide.","The list is empty."],
+["تاريخ التقرير:","Date du rapport :","Report date:"],["بلا تاريخ","Sans date","No date"],["دواء","médicaments","medicines"],
+["الصورة","Image","Photo"],["الدواء","Médicament","Medicine"],["الدفعة","Lot","Lot"],["الانتهاء","Péremption","Expiry"],["العدد","Qté","Qty"],["الحالة","Statut","Status"],
+["أفقي 4:3","Paysage 4:3","Landscape 4:3"],["عمودي 3:4","Portrait 3:4","Portrait 3:4"],["أدويتك","Vos médicaments","Your medicines"],
+["لديك","Vous avez","You have"]
+];
+var EXM={},TRS=[];TR.forEach(function(e){if(/[\s:]/.test(e[0])||e[0].length>=8)TRS.push(e);else EXM[e[0]]=e})
+TRS.sort(function(a,b){return b[0].length-a[0].length});
+var RXR=[[/ينتهي بعد (\d+) يوم/g,"expire dans $1 j","expires in $1 d"],[/منتهي منذ (\d+) يوم/g,"périmé depuis $1 j","expired $1 d ago"],[/لديك (\d+) من (\d+)\./g,"Vous avez $1 sur $2.","You have $1 of $2."],[/\((\d+) يوم\)/g,"($1 j)","($1 d)"],[/ دج/g," DA"," DA"],[/ينتهي (\d{2}\/\d{4})/g,"expire $1","expires $1"]];
+function tr(s){
+  if(LANG==="ar"||!s)return s;var k=LANG==="fr"?1:2,t=String(s),e=EXM[t.trim()];
+  if(e)return t.replace(t.trim(),e[k]);
+  RXR.forEach(function(r){t=t.replace(r[0],r[k])});
+  for(var i=0;i<TRS.length;i++)if(t.indexOf(TRS[i][0])>=0)t=t.split(TRS[i][0]).join(TRS[i][k]);
+  return t}
+function xl1(n){if(n._o===undefined)n._o=n.nodeValue;var t=LANG==="ar"?n._o:tr(n._o);if(n.nodeValue!==t)n.nodeValue=t}
+function xl(root){
+  var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),n,L=[];while((n=w.nextNode()))L.push(n);L.forEach(xl1);
+  if(root.querySelectorAll)root.querySelectorAll("[placeholder]").forEach(function(el){if(el._p===undefined)el._p=el.getAttribute("placeholder");el.setAttribute("placeholder",LANG==="ar"?el._p:tr(el._p))})}
+new MutationObserver(function(ms){if(LANG==="ar")return;ms.forEach(function(m){m.addedNodes.forEach(function(a){if(a.nodeType===3)xl1(a);else if(a.nodeType===1)xl(a)})})}).observe(document.body,{childList:true,subtree:true});
+var _al=window.alert,_cf=window.confirm,_pr=window.prompt;
+window.alert=function(m){_al.call(window,tr(String(m)))};window.confirm=function(m){return _cf.call(window,tr(String(m)))};window.prompt=function(m,d){return _pr.call(window,tr(String(m)),d)};
+function LN(){return LANG==="fr"?"الفرنسية":LANG==="en"?"الإنجليزية":"العربية"}
+function setLang(l){
+  LANG=l;try{localStorage.setItem("meds-lang",l)}catch(e){}
+  document.documentElement.lang=l;document.documentElement.dir=l==="ar"?"rtl":"ltr";
+  document.title=l==="fr"?"Pharmacie de la Maison":l==="en"?"Home Pharmacy":"صيدلية البيت";
+  $("lg").textContent=l==="fr"?"🌐 Français":l==="en"?"🌐 English":"🌐 العربية";
+  render();xl(document.body)}
+$("lg").onclick=function(){setLang(LANG==="ar"?"fr":LANG==="fr"?"en":"ar")};
 $("bk").onclick=function(){var u=URL.createObjectURL(new Blob([JSON.stringify(items,null,1)],{type:"application/json"})),l=document.createElement("a");l.href=u;l.download="medicines-backup.json";l.click();setTimeout(function(){URL.revokeObjectURL(u)},1000)};
 $("gt").onclick=async function(){
   var k=localStorage.getItem("gkey");
@@ -506,7 +621,7 @@ $("restore").onchange=function(){
   var f=this.files[0];if(!f)return;
   f.text().then(function(t){var a=JSON.parse(t);if(Array.isArray(a)){items=a;save();render()}}).catch(function(){alert("ملف غير صالح")})
 };
-load();try{snap=JSON.parse(localStorage.getItem("meds-snap")||"{}")||{}}catch(e){snap={}}var av0=localStorage.getItem("meds-av");AV=av0===null?DEF:(av0==="-"?"":av0);showAv();render();initSync();if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});
+load();try{snap=JSON.parse(localStorage.getItem("meds-snap")||"{}")||{}}catch(e){snap={}}var av0=localStorage.getItem("meds-av");AV=av0===null?DEF:(av0==="-"?"":av0);showAv();$("fLoc").onchange=render;$("fWho").onchange=render;render();initSync();setLang(LANG);if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});
 })();
 </script>
 </body>
